@@ -1,0 +1,46 @@
+# This docker-compose is only for local
+version: '3.8'
+
+services:
+  sonarqube_db:
+    image: bitnami/postgresql:14
+    container_name: sonarqube_db
+    environment:
+      - POSTGRESQL_PORT_NUMBER=5432
+      - POSTGRESQL_USERNAME=sonar
+      - POSTGRESQL_PASSWORD=sonar
+      - POSTGRESQL_DATABASE=sonardb
+    networks:
+      - sonarqube_network
+    volumes:
+      - sonarqube_db:/bitnami/postgresql
+
+  sonarqube:
+    image: adrianmusante/sonarqube:9
+    container_name: sonarqube
+    depends_on:
+      - sonarqube_db
+    environment:
+      - POSTGRESQL_HOST=sonarqube_db
+      - POSTGRESQL_PORT_NUMBER=5432
+      - SONARQUBE_DATABASE_NAME=sonardb
+      - SONARQUBE_DATABASE_USER=sonar
+      - SONARQUBE_DATABASE_PASSWORD=sonar
+      - SONARQUBE_USERNAME=${SONARQUBE_USERNAME:-admin}
+      - SONARQUBE_PASSWORD=${SONARQUBE_PASSWORD:-admin123}
+    ports:
+      - "9000:9000"
+    networks:
+      - sonarqube_network
+    volumes:
+      - sonarqube:/bitnami/sonarqube
+
+networks:
+  sonarqube_network:
+    driver: bridge
+
+volumes:
+  sonarqube_db:
+    driver: local
+  sonarqube:
+    driver: local

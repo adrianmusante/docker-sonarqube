@@ -1,0 +1,52 @@
+# This docker-compose is only for local
+version: '3.8'
+
+services:
+  sonarqube_db:
+    image: bitnami/postgresql:14
+    container_name: sonarqube_db
+    environment:
+      - POSTGRESQL_PORT_NUMBER=5432
+      - POSTGRESQL_USERNAME=sonar
+      - POSTGRESQL_PASSWORD=sonar
+      - POSTGRESQL_DATABASE=sonardb
+    ports:
+      - "5432:5432"
+    networks:
+      - sonarqube_network
+    volumes:
+      - ./_local/data/sonarqube_db:/bitnami/postgresql
+
+  sonarqube:
+    image: adrianmusante/sonarqube:0.0.0
+    container_name: sonarqube
+    build:
+      context: sonarqube
+    depends_on:
+      - sonarqube_db
+    environment:
+      - BITNAMI_DEBUG=${BITNAMI_DEBUG:-true}
+      - POSTGRESQL_HOST=sonarqube_db
+      - POSTGRESQL_PORT_NUMBER=5432
+      - SONARQUBE_DATABASE_NAME=sonardb
+      - SONARQUBE_DATABASE_USER=sonar
+      - SONARQUBE_DATABASE_PASSWORD=sonar
+      - SONARQUBE_USERNAME=${SONARQUBE_USERNAME:-admin}
+      - SONARQUBE_PASSWORD=${SONARQUBE_PASSWORD:-admin123}
+      - SONARQUBE_CE_JAVA_ADD_OPTS=${SONARQUBE_CE_JAVA_ADD_OPTS:--Xmx1192m}
+      - SONARQUBE_WEB_JAVA_ADD_OPTS=${SONARQUBE_WEB_JAVA_ADD_OPTS:--Xmx1192m}
+      - SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS=${SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS:-}
+      - SONARQUBE_EXTRA_PROPERTIES=${SONARQUBE_EXTRA_PROPERTIES:-}
+      - SONARQUBE_EXTRA_SETTINGS=${SONARQUBE_EXTRA_SETTINGS:-}
+      - SONARQUBE_WEB_URL=${SONARQUBE_WEB_URL:-}
+      - SONARQUBE_WEB_CONTEXT=${SONARQUBE_WEB_CONTEXT:-/}
+    ports:
+      - "9000:9000"
+    networks:
+      - sonarqube_network
+    volumes:
+      - ./_local/data/sonarqube:/bitnami/sonarqube
+
+networks:
+  sonarqube_network:
+    driver: bridge
