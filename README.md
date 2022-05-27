@@ -17,6 +17,16 @@ A distribution of Sonarqube Community Edition packaged by Bitnami with addons.
 - Gravatar enabled by default
 - Refresh configuration from environment variables on startup. (**Note:** The admin user only is loaded in first startup)
 
+
+## Docker registry
+
+The recommended way to get the SonarQube Docker Image is to pull the prebuilt image from the [Docker Hub Registry](https://hub.docker.com/r/adrianmusante/sonarqube).
+
+To use a specific version, you can pull a versioned tag. You can view the [list of available versions](https://hub.docker.com/r/adrianmusante/sonarqube/tags/) in the Docker Hub Registry. 
+
+- [`9`, `9.3`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
+
+
 ## Configuration
 
 ### Environment variables
@@ -53,5 +63,8 @@ This SonarQube image inherits all environment variables from [Bitnami SonarQube]
 ##### sonarqube-community-branch-plugin
 
 - `SONARQUBE_PR_PLUGIN_RESOURCES_URL`: Base URL used to load the images for the PR comments. If the variable is defined as empty the image links are referenced to `sonar.core.serverBaseURL`. Default: `https://raw.githubusercontent.com/mc1arke/sonarqube-community-branch-plugin/master/src/main/resources/static`
+
+
+
 
 
