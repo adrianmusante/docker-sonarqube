@@ -14,6 +14,7 @@ A distribution of Sonarqube Community Edition packaged by Bitnami with addons.
 ### Presets:
 
 - SonarQube telemetry disabled
+- Unattended [migration](https://docs.sonarqube.org/latest/setup/upgrading)
 - Gravatar enabled by default
 - Refresh configuration from environment variables on startup. (**Note:** The admin user only is loaded in first startup)
 
@@ -57,6 +58,7 @@ Available environment variables:
 
 This SonarQube image inherits all environment variables from [Bitnami SonarQube](https://github.com/bitnami/bitnami-docker-sonarqube#environment-variables). The differences are:
 
+- `SONARQUBE_SKIP_MIGRATION`: Performs migration when the version of SonarQube is updated. Otherwise, if the migration is skipped the system will not be operational without performing a manual step. Default: **no**
 - `SONARQUBE_EXTRA_SETTINGS`: Comma separated list of settings to be set in `Administration -> Configuration -> General Settings`, e.g. `sonar.lf.enableGravatar=false,sonar.lf.logoUrl=https://mysonar.com/logo`. No defaults.
 - `SONARQUBE_WEB_URL`: HTTP(S) URL of the SonarQube server, such as `https://yourhost.yourdomain/sonar`. This value is used i.e. to create links in emails or Pull-Request decoration. No defaults.
 
