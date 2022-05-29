@@ -13,5 +13,5 @@ cat <<-MOD >>/opt/bitnami/scripts/sonarqube/setup.sh
 
 ADDONS_PROCESS_STAGE=setup
 . "\$ADDONS_HOME"/scripts/update-settings.sh
-
+"\$ADDONS_HOME/scripts/migrate.sh"
 MOD

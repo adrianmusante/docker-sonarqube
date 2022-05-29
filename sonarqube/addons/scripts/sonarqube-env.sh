@@ -4,15 +4,17 @@
 
 . /opt/bitnami/scripts/sonarqube-env.sh
 
-function ensure_url() { # removes end-slash of url
-  local url="${1}"
-  local length=${#url}
-  ((length--))
-  echo "$url" | grep -qE "/$" && url="$(echo "$url" | cut -c1-$length)"
+ensure_url() { # removes end-slash of url
+  local url="${1:-}"
+  if grep -qE "/$" <(echo "$url"); then
+    local length=${#url}
+    ((length--))
+    url="$(echo "$url" | cut -c1-$length 2>/dev/null)"
+  fi
   echo -n "$url"
 }
 
-function sonarqube_override_extra_properties() {
+sonarqube_override_extra_properties() {
   local extra_props="sonar.telemetry.enable=false"
   local -r props="${SONARQUBE_EXTRA_PROPERTIES:-}"
   [ -z "$props" ] || extra_props="$extra_props,$props"
@@ -27,6 +29,8 @@ export SONARQUBE_CE_JAVA_ADD_OPTS="-javaagent:$SONARQUBE_VOLUME_PLUGINS_DIR/sona
 export SONARQUBE_WEB_JAVA_ADD_OPTS="-javaagent:$SONARQUBE_VOLUME_PLUGINS_DIR/sonarqube-community-branch-plugin.jar=web ${SONARQUBE_WEB_JAVA_ADD_OPTS:-}"
 export SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS="-Dnode.store.allow_mmap=false ${SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS:-}"
 
+export SONARQUBE_API_URL="http://127.0.0.1:${SONARQUBE_PORT_NUMBER}$(ensure_url $SONARQUBE_WEB_CONTEXT)/api" # only for internal processes
 export SONARQUBE_WEB_URL="$(ensure_url "${SONARQUBE_WEB_URL:-}")"
 [ -v SONARQUBE_PR_PLUGIN_RESOURCES_URL ] || export SONARQUBE_PR_PLUGIN_RESOURCES_URL=https://raw.githubusercontent.com/mc1arke/sonarqube-community-branch-plugin/master/src/main/resources/static
 export SONARQUBE_EXTRA_SETTINGS="${SONARQUBE_EXTRA_SETTINGS:-}"
+export SONARQUBE_SKIP_MIGRATION="${SONARQUBE_SKIP_MIGRATION:-no}"
