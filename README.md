@@ -25,7 +25,7 @@ The recommended way to get the SonarQube Docker Image is to pull the prebuilt im
 
 To use a specific version, you can pull a versioned tag. You can view the [list of available versions](https://hub.docker.com/r/adrianmusante/sonarqube/tags/) in the Docker Hub Registry. 
 
-- [`9`, `9.3`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
+- [`9`, `9.4`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
 
 
 ## Configuration
