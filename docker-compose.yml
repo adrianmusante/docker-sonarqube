@@ -26,8 +26,8 @@ services:
       - sonarqube_db
     environment:
       - BITNAMI_DEBUG=${BITNAMI_DEBUG:-true}
-      - POSTGRESQL_HOST=sonarqube_db
-      - POSTGRESQL_PORT_NUMBER=5432
+      - SONARQUBE_DATABASE_HOST=sonarqube_db
+      - SONARQUBE_DATABASE_PORT_NUMBER=5432
       - SONARQUBE_DATABASE_NAME=sonardb
       - SONARQUBE_DATABASE_USER=sonar
       - SONARQUBE_DATABASE_PASSWORD=sonar
