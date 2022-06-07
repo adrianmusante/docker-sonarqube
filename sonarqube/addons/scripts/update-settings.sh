@@ -29,6 +29,10 @@ sonarqube_update_settings() {
   ! is_empty_value "$SONARQUBE_WEB_URL" && settings_to_update+=("sonar.core.serverBaseURL=$SONARQUBE_WEB_URL")
   ! is_empty_value "$SONARQUBE_PR_PLUGIN_RESOURCES_URL" && settings_to_update+=("com.github.mc1arke.sonarqube.plugin.branch.image-url-base=$SONARQUBE_PR_PLUGIN_RESOURCES_URL")
 
+  # EMAIL configuration
+  ! is_empty_value "$SONARQUBE_EMAIL_FROM_ADDRESS" && settings_to_update+=("email.from=$SONARQUBE_EMAIL_FROM_ADDRESS")
+  ! is_empty_value "$SONARQUBE_EMAIL_FROM_NAME" && settings_to_update+=("email.fromName=$SONARQUBE_EMAIL_FROM_NAME")
+
   # SMTP configuration
   if ! is_empty_value "$SONARQUBE_SMTP_HOST"; then
     settings_to_update+=("email.smtp_host.secured=${SONARQUBE_SMTP_HOST}")

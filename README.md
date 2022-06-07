@@ -11,7 +11,7 @@ A distribution of Sonarqube Community Edition packaged by Bitnami with addons.
 - [sonar-clover](https://github.com/adrianmusante/sonar-clover/tree/hotfix/sonarqube-9): Enables OpenClover report support for project coverage.
 - [sonarqube-community-branch-plugin](https://github.com/mc1arke/sonarqube-community-branch-plugin): Allows branch and Pull Request analysis for GitHub, GitLab or some else. 
 
-### Presets:
+### Additional features:
 
 - SonarQube telemetry disabled
 - Unattended [migration](https://docs.sonarqube.org/latest/setup/upgrading)
@@ -58,9 +58,16 @@ Available environment variables:
 
 This SonarQube image inherits all environment variables from [Bitnami SonarQube](https://github.com/bitnami/bitnami-docker-sonarqube#environment-variables). The differences are:
 
+##### General configuration
+
 - `SONARQUBE_SKIP_MIGRATION`: Performs migration when the version of SonarQube is updated. Otherwise, if the migration is skipped the system will not be operational without performing a manual step. Default: **no**
 - `SONARQUBE_EXTRA_SETTINGS`: Comma separated list of settings to be set in `Administration -> Configuration -> General Settings`, e.g. `sonar.lf.enableGravatar=false,sonar.lf.logoUrl=https://mysonar.com/logo`. No defaults.
 - `SONARQUBE_WEB_URL`: HTTP(S) URL of the SonarQube server, such as `https://yourhost.yourdomain/sonar`. This value is used i.e. to create links in emails or Pull-Request decoration. No defaults.
+
+##### Email configuration
+
+- `SONARQUBE_EMAIL_FROM_ADDRESS`: Emails will come from this address, e.g. `noreply@sonarsource.com`. If the variable is empty then `SONARQUBE_EMAIL` variable is used. No defaults.
+- `SONARQUBE_EMAIL_FROM_NAME`: Emails will come from this address name, e.g. `SonarQube`. No defaults.
 
 ##### sonarqube-community-branch-plugin
 
