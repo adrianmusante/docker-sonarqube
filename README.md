@@ -4,7 +4,7 @@ A distribution of Sonarqube Community Edition packaged by Bitnami with addons.
 
 ## Documentation: 
 
-- [bitnami-docker-sonarqube](https://github.com/bitnami/bitnami-docker-sonarqube)
+- [bitnami-docker-sonarqube](https://github.com/bitnami/containers/tree/main/bitnami/sonarqube)
 
 ### Pre-installed plugins:
 
@@ -25,7 +25,7 @@ The recommended way to get the SonarQube Docker Image is to pull the prebuilt im
 
 To use a specific version, you can pull a versioned tag. You can view the [list of available versions](https://hub.docker.com/r/adrianmusante/sonarqube/tags/) in the Docker Hub Registry. 
 
-- [`9`, `9.5`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
+- [`9`, `9.6`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
 
 
 ## Configuration
@@ -56,7 +56,7 @@ When you start the SonarQube image, you can adjust the configuration of the inst
 
 Available environment variables:
 
-This SonarQube image inherits all environment variables from [Bitnami SonarQube](https://github.com/bitnami/bitnami-docker-sonarqube#environment-variables). The differences are:
+This SonarQube image inherits all environment variables from [Bitnami SonarQube](https://github.com/bitnami/containers/tree/main/bitnami/sonarqube#environment-variables). The differences are:
 
 ##### General configuration
 
