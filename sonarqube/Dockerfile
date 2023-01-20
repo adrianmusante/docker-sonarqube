@@ -1,4 +1,4 @@
-ARG SONARQUBE_VERSION=9.6.1
+ARG SONARQUBE_VERSION=9.7.1
 FROM bitnami/sonarqube:$SONARQUBE_VERSION
 
 USER root
@@ -6,7 +6,7 @@ USER root
 ARG ADDONS_HOME=/opt/addons
 ENV ADDONS_HOME $ADDONS_HOME
 
-ARG SONARQUBE_PR_PLUGIN_VERSION=1.12.0
+ARG SONARQUBE_PR_PLUGIN_VERSION=1.13.0
 RUN mkdir -p $ADDONS_HOME/plugins  \
     && cd $ADDONS_HOME  \
     && curl -fsSL -o plugins/sonarqube-community-branch-plugin.jar "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONARQUBE_PR_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONARQUBE_PR_PLUGIN_VERSION}.jar"
