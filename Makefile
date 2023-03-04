@@ -15,6 +15,9 @@ reset_volumes:
 	SONARQUBE_DIR=$(DATA_DIR)/sonarqube && sudo rm -rdf $$SONARQUBE_DIR && mkdir -p -m 777 $$SONARQUBE_DIR && sudo chown -R 1001:1001 $$SONARQUBE_DIR \
 	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p -m 777 $$DB_DIR && sudo chown -R 0:0 $$DB_DIR
 
+build_multi:
+	docker buildx build --platform linux/amd64,linux/arm64 -t adrianmusante/sonarqube:0.0.0 sonarqube
+
 run:
 	docker-compose down || true; docker-compose up --build -V --force-recreate
 
