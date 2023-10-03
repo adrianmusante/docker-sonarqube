@@ -18,7 +18,7 @@ services:
       - ./_local/data/sonarqube_db:/bitnami/postgresql
 
   sonarqube:
-    image: adrianmusante/sonarqube:0.0.0
+    image: ${DOCKER_REGISTRY:-adrianmusante}/sonarqube:0.0.0
     container_name: sonarqube
     build:
       context: sonarqube

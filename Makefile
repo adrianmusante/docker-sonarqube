@@ -2,6 +2,7 @@ SONARQUBE_VERSION=
 LOCAL_DIR=$(PWD)/_local
 DATA_DIR=$(LOCAL_DIR)/data
 BACKUP_DIR=$(LOCAL_DIR)/scripts
+DOCKER_REGISTRY=
 
 extract_scripts:
 	[ -z "$$SONARQUBE_VERSION" ] && SONARQUBE_VERSION="$$(grep '^ARG SONARQUBE_VERSION=' ./sonarqube/Dockerfile | cut -d '=' -f2)" ; \
@@ -16,7 +17,10 @@ reset_volumes:
 	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p -m 777 $$DB_DIR && sudo chown -R 0:0 $$DB_DIR
 
 build_multi:
-	docker buildx build --platform linux/amd64,linux/arm64 -t adrianmusante/sonarqube:0.0.0 sonarqube
+	[ -z "$(DOCKER_REGISTRY)" ] && DOCKER_REGISTRY="$$(grep -v '^ *#' .env | grep "DOCKER_REGISTRY=" | tail -1 | cut -d'=' -f2- | tr -d ' ')" ; \
+	[ -z "$$DOCKER_REGISTRY" ] && echo "Missing DOCKER_REGISTRY !!" && exit 1; \
+	echo "DOCKER_REGISTRY: $$DOCKER_REGISTRY" \
+		&& docker buildx build --platform linux/amd64,linux/arm64 -t "$$DOCKER_REGISTRY/sonarqube:0.0.0" sonarqube --push
 
 run:
 	docker-compose down || true; docker-compose up --build -V --force-recreate
