@@ -1,9 +1,9 @@
 # This docker-compose is only for local
-version: '3.8'
+version: '3.9'
 
 services:
   sonarqube_db:
-    image: bitnami/postgresql:14
+    image: bitnami/postgresql:16
     container_name: sonarqube_db
     environment:
       - POSTGRESQL_PORT_NUMBER=5432
