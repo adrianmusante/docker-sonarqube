@@ -20,4 +20,4 @@ RUN cd $ADDONS_HOME && mkdir -p scripts  \
 
 USER 1001
 
-ENTRYPOINT ./$ADDONS_HOME/scripts/entrypoint.sh
+ENTRYPOINT ["/opt/addons/scripts/entrypoint.sh"]
