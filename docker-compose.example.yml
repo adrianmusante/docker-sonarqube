@@ -10,8 +10,6 @@ services:
       - POSTGRESQL_USERNAME=sonar
       - POSTGRESQL_PASSWORD=sonar
       - POSTGRESQL_DATABASE=sonardb
-    networks:
-      - sonarqube_network
     volumes:
       - sonarqube_db:/bitnami/postgresql
 
@@ -30,13 +28,12 @@ services:
       - SONARQUBE_PASSWORD=${SONARQUBE_PASSWORD:-admin123}
     ports:
       - "9000:9000"
-    networks:
-      - sonarqube_network
     volumes:
       - sonarqube:/bitnami/sonarqube
 
 networks:
-  sonarqube_network:
+  default:
+    name: sonarqube_network
     driver: bridge
 
 volumes:

@@ -12,8 +12,6 @@ services:
       - POSTGRESQL_DATABASE=sonardb
     ports:
       - "5432:5432"
-    networks:
-      - sonarqube_network
     volumes:
       - ./_local/data/sonarqube_db:/bitnami/postgresql
 
@@ -43,11 +41,10 @@ services:
       - SONARQUBE_EMAIL_FROM_NAME=${SONARQUBE_EMAIL_FROM_NAME:-}
     ports:
       - "9000:9000"
-    networks:
-      - sonarqube_network
     volumes:
       - ./_local/data/sonarqube:/bitnami/sonarqube
 
 networks:
-  sonarqube_network:
+  default:
+    name: sonarqube_network
     driver: bridge
