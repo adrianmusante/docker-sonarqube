@@ -16,11 +16,11 @@ reset_volumes:
 	SONARQUBE_DIR=$(DATA_DIR)/sonarqube && sudo rm -rdf $$SONARQUBE_DIR && mkdir -p $$SONARQUBE_DIR && sudo chmod -R 777 $$SONARQUBE_DIR && sudo chown -R 1001:1001 $$SONARQUBE_DIR \
 	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p $$DB_DIR && sudo chmod -R 777 $$DB_DIR && sudo chown -R 0:0 $$DB_DIR
 
-build_multi:
+build:
 	[ -z "$(DOCKER_REGISTRY)" ] && DOCKER_REGISTRY="$$(grep -v '^ *#' .env | grep "DOCKER_REGISTRY=" | tail -1 | cut -d'=' -f2- | tr -d ' ')" ; \
 	[ -z "$$DOCKER_REGISTRY" ] && echo "Missing DOCKER_REGISTRY !!" && exit 1; \
 	echo "DOCKER_REGISTRY: $$DOCKER_REGISTRY" \
-		&& docker buildx build --platform linux/amd64,linux/arm64 -t "$$DOCKER_REGISTRY/sonarqube:0.0.0" sonarqube --push
+		&& docker buildx build --platform linux/amd64 -t "$$DOCKER_REGISTRY/sonarqube:0.0.0" sonarqube --push
 
 run:
 	docker-compose down || true; docker-compose up --build -V --force-recreate
