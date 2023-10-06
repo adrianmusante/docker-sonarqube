@@ -3,17 +3,16 @@ version: '3.9'
 
 services:
   sonarqube_db:
-    image: bitnami/postgresql:16
+    image: postgres:16-alpine
     container_name: sonarqube_db
     environment:
-      - POSTGRESQL_PORT_NUMBER=5432
-      - POSTGRESQL_USERNAME=sonar
-      - POSTGRESQL_PASSWORD=sonar
-      - POSTGRESQL_DATABASE=sonardb
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonardb
     ports:
       - "5432:5432"
     volumes:
-      - ./_local/data/sonarqube_db:/bitnami/postgresql
+      - ./_local/data/sonarqube_db/data:/var/lib/postgresql/data
 
   sonarqube:
     image: ${DOCKER_REGISTRY:-adrianmusante}/sonarqube:0.0.0
