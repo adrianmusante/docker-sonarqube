@@ -13,8 +13,9 @@ extract_scripts:
 
 reset_volumes:
 	docker-compose down || true; \
+	sudo chmod 777 "$(DATA_DIR)" || true; \
 	SONARQUBE_DIR=$(DATA_DIR)/sonarqube && sudo rm -rdf $$SONARQUBE_DIR && mkdir -p $$SONARQUBE_DIR && sudo chmod -R 777 $$SONARQUBE_DIR && sudo chown -R 1001:1001 $$SONARQUBE_DIR \
-	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p $$DB_DIR && sudo chmod -R 777 $$DB_DIR && sudo chown -R 0:0 $$DB_DIR
+	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p $$DB_DIR && sudo chmod -R 777 $$DB_DIR && sudo chown -R 1001:1001 $$DB_DIR
 
 build:
 	[ -z "$(DOCKER_REGISTRY)" ] && DOCKER_REGISTRY="$$(grep -v '^ *#' .env | grep "DOCKER_REGISTRY=" | tail -1 | cut -d'=' -f2- | tr -d ' ')" ; \
