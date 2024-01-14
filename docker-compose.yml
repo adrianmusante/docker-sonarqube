@@ -21,6 +21,8 @@ services:
       context: sonarqube
     depends_on:
       - sonarqube_db
+    env_file:
+      - .env
     environment:
       - BITNAMI_DEBUG=${BITNAMI_DEBUG:-true}
       - SONARQUBE_DATABASE_HOST=sonarqube_db

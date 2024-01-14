@@ -8,7 +8,6 @@ A distribution of Sonarqube Community Edition packaged by Bitnami with addons.
 
 ### Pre-installed plugins:
 
-- [sonar-clover](https://github.com/adrianmusante/sonar-clover/tree/hotfix/sonarqube-9): Enables OpenClover report support for project coverage.
 - [sonarqube-community-branch-plugin](https://github.com/mc1arke/sonarqube-community-branch-plugin): Allows branch and Pull Request analysis for GitHub, GitLab or some else. 
 
 ### Additional features:
@@ -25,7 +24,7 @@ The recommended way to get the SonarQube Docker Image is to pull the prebuilt im
 
 To use a specific version, you can pull a versioned tag. You can view the [list of available versions](https://hub.docker.com/r/adrianmusante/sonarqube/tags/) in the Docker Hub Registry. 
 
-- [`9`, `9.9`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
+- [`10`, `10.3`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
 
 
 ## Configuration
