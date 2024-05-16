@@ -1,6 +1,4 @@
 # This docker-compose is only for local
-version: '3.9'
-
 services:
   sonarqube_db:
     image: bitnami/postgresql:16
