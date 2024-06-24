@@ -1,12 +1,13 @@
 ARG SONARQUBE_VERSION=10.5.1
-FROM bitnami/sonarqube:$SONARQUBE_VERSION as base
+FROM bitnami/sonarqube:$SONARQUBE_VERSION AS base
 
 USER root
 
 ARG ADDONS_HOME=/opt/addons
 ENV ADDONS_HOME $ADDONS_HOME
 
-FROM base as build
+
+FROM base AS build
 
 ARG PLUGINS_DIR="$ADDONS_HOME/plugins"
 RUN mkdir -p "$PLUGINS_DIR"
@@ -26,7 +27,7 @@ RUN cd sonarqube-community-branch-plugin \
     && cp ./build/libs/sonarqube-community-branch-plugin-*.jar "$PLUGINS_DIR/sonarqube-community-branch-plugin.jar"
 
 
-FROM base as final
+FROM base AS final
 
 COPY --from=build $ADDONS_HOME $ADDONS_HOME
 
@@ -35,7 +36,6 @@ RUN cd $ADDONS_HOME \
     && chmod -R 755 scripts \
     && ./scripts/post-copy/run.sh \
     && rm -rdf scripts/post-copy
-
 
 USER 1001
 
