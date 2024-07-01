@@ -1,4 +1,5 @@
-ARG SONARQUBE_VERSION=10.5.1
+ARG SONARQUBE_VERSION=10.6.0
+ARG SONARQUBE_PR_PLUGIN_VERSION=1.21.0
 FROM bitnami/sonarqube:$SONARQUBE_VERSION AS base
 
 USER root
@@ -12,28 +13,20 @@ FROM base AS build
 ARG PLUGINS_DIR="$ADDONS_HOME/plugins"
 RUN mkdir -p "$PLUGINS_DIR"
 
-# Note: This option is temporarily unavailable because the plugin's release is delayed.
-#ARG SONARQUBE_PR_PLUGIN_VERSION=1.19.0
-#ADD "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONARQUBE_PR_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONARQUBE_PR_PLUGIN_VERSION}.jar" "$PLUGINS_DIR/sonarqube-community-branch-plugin.jar"
+ARG SONARQUBE_PR_PLUGIN_VERSION
+ADD "https://github.com/adrianmusante/sonarqube-community-branch-plugin/releases/download/${SONARQUBE_PR_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONARQUBE_PR_PLUGIN_VERSION}.jar" "$PLUGINS_DIR/sonarqube-community-branch-plugin.jar"
 
-WORKDIR /build
+COPY addons $ADDONS_HOME
 
-ADD https://github.com/mc1arke/sonarqube-community-branch-plugin.git sonarqube-community-branch-plugin
-RUN cd sonarqube-community-branch-plugin \
-    && SONARQUBE_COMPILATION_VERSION="$(ls /opt/bitnami/sonarqube/lib/sonar-application-*.jar | sed 's|.*/sonar-application-\(.*\)\.jar|\1|')" \
-    && sed -i "s/def sonarqubeVersion = '.*'/def sonarqubeVersion = '$SONARQUBE_COMPILATION_VERSION'/" build.gradle \
-    && grep -q "$SONARQUBE_COMPILATION_VERSION" build.gradle \
-    && ./gradlew build -i -x test \
-    && cp ./build/libs/sonarqube-community-branch-plugin-*.jar "$PLUGINS_DIR/sonarqube-community-branch-plugin.jar"
+RUN cd $ADDONS_HOME \
+    && chmod 644 plugins/*.jar \
+    && chmod -R 755 scripts
 
 
 FROM base AS final
 
 COPY --from=build $ADDONS_HOME $ADDONS_HOME
-
-COPY addons $ADDONS_HOME
 RUN cd $ADDONS_HOME \
-    && chmod -R 755 scripts \
     && ./scripts/post-copy/run.sh \
     && rm -rdf scripts/post-copy
 
