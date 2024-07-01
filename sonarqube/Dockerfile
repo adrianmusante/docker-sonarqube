@@ -16,14 +16,17 @@ RUN mkdir -p "$PLUGINS_DIR"
 ARG SONARQUBE_PR_PLUGIN_VERSION
 ADD "https://github.com/adrianmusante/sonarqube-community-branch-plugin/releases/download/${SONARQUBE_PR_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONARQUBE_PR_PLUGIN_VERSION}.jar" "$PLUGINS_DIR/sonarqube-community-branch-plugin.jar"
 
+COPY addons $ADDONS_HOME
+
+RUN cd $ADDONS_HOME \
+    && chmod 644 plugins/*.jar \
+    && chmod -R 755 scripts
+
 
 FROM base AS final
 
 COPY --from=build $ADDONS_HOME $ADDONS_HOME
-
-COPY addons $ADDONS_HOME
 RUN cd $ADDONS_HOME \
-    && chmod -R 755 scripts \
     && ./scripts/post-copy/run.sh \
     && rm -rdf scripts/post-copy
 
