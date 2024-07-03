@@ -42,6 +42,13 @@ services:
       - "9000:9000"
     volumes:
       - ./_local/data/sonarqube:/bitnami/sonarqube
+    healthcheck:
+      test: health-check
+      start_period: 3m
+      start_interval: 10s
+      interval: 1m
+      timeout: 10s
+      retries: 3
 
 networks:
   default:
