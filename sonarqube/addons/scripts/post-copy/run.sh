@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as admin"
+if [ ${EUID:-$(id -u)} -ne 0 ]; then
+  echo "Please run this script as root" 1>&2
   exit 1
 fi
 
@@ -15,3 +15,6 @@ ADDONS_PROCESS_STAGE=setup
 . "\$ADDONS_HOME"/scripts/update-settings.sh
 "\$ADDONS_HOME/scripts/migrate.sh"
 MOD
+
+# symlinks for easy access
+ln -sf "$ADDONS_HOME/scripts/health-check" /usr/local/bin/health-check
