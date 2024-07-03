@@ -14,6 +14,7 @@ A distribution of Sonarqube Community Edition packaged by Bitnami with addons.
 
 - SonarQube telemetry disabled
 - Unattended [migration](https://docs.sonarqube.org/latest/setup/upgrading)
+- Health-Check command-line tool
 - Gravatar enabled by default
 - Refresh configuration from environment variables on startup. (**Note:** The admin user only is loaded in first startup)
 
