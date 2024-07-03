@@ -12,7 +12,7 @@ Some of the options include:
 
     -s <STATUS>                 Repeat this option to add more valid status. Possible status:
                                   - STARTING: Server initialization is ongoing
-                                  - UP: SonarQube instance is up and running
+                                  - UP: SonarQube instance is up and running (always added as valid)
                                   - DOWN: Instance is up but not running (e.g., due to migration failure)
                                   - RESTARTING: Restart has been requested
                                   - DB_MIGRATION_NEEDED: Database migration required
@@ -21,8 +21,10 @@ Some of the options include:
     -h                          display this help and exit
 
 Example:
+    - $_bin
     - $_bin -u http://my-host:9000/api/system/status
     - $_bin -s STARTING -s RESTARTING
+    - $_bin -s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING
 
 MSG
   exit 2
