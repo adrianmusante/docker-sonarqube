@@ -12,7 +12,7 @@ extract_scripts:
 		&& docker run --rm --entrypoint= -u "$$(id -u):$$(id -g)" -v "$$BACKUP_VERSION_DIR:/bkp" bitnami/sonarqube:$$SONARQUBE_VERSION cp -Rv /opt/bitnami/scripts/. /bkp
 
 reset_volumes:
-	docker-compose down || true; \
+	docker compose down || true; \
 	sudo chmod 777 "$(DATA_DIR)" || true; \
 	SONARQUBE_DIR=$(DATA_DIR)/sonarqube && sudo rm -rdf $$SONARQUBE_DIR && mkdir -p $$SONARQUBE_DIR && sudo chmod -R 777 $$SONARQUBE_DIR && sudo chown -R 1001:1001 $$SONARQUBE_DIR \
 	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p $$DB_DIR && sudo chmod -R 777 $$DB_DIR && sudo chown -R 1001:1001 $$DB_DIR
@@ -24,19 +24,19 @@ build:
 		&& docker buildx build --platform linux/amd64 -t "$$DOCKER_REGISTRY/sonarqube:0.0.0" sonarqube --push
 
 run:
-	docker-compose down || true; docker-compose up --build -V --force-recreate
+	docker compose down || true; docker compose up --build -V --force-recreate
 
 run_detach:
-	docker-compose down || true; docker-compose up --build -V --force-recreate -d
+	docker compose down || true; docker compose up --build -V --force-recreate -d
 
 run_db:
-	docker-compose up -d -V --force-recreate --no-deps sonarqube_db
+	docker compose up -d -V --force-recreate --no-deps sonarqube_db
 
 run_sonar:
-	docker-compose up -d --build -V --force-recreate --no-deps sonarqube && docker-compose logs -f sonarqube
+	docker compose up -d --build -V --force-recreate --no-deps sonarqube && docker compose logs -f sonarqube
 
 logs_db:
-	docker-compose logs -f sonarqube_db
+	docker compose logs -f sonarqube_db
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
