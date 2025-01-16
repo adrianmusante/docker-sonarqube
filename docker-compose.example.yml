@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=sonar
       - POSTGRES_DB=sonardb
     volumes:
-      - sonarqube_db:/bitnami/postgresql
+      - sonarqube_db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       start_period: 1m
