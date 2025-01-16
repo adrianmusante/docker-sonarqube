@@ -1,22 +1,31 @@
 services:
-  sonarqube_db:
-    image: bitnami/postgresql:16
-    container_name: sonarqube_db
+  sonarqube-db:
+    image: postgres:17-alpine
+    container_name: sonarqube-db
+    restart: unless-stopped
     environment:
-      - POSTGRESQL_PORT_NUMBER=5432
-      - POSTGRESQL_USERNAME=sonar
-      - POSTGRESQL_PASSWORD=sonar
-      - POSTGRESQL_DATABASE=sonardb
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonardb
     volumes:
-      - sonarqube_db:/bitnami/postgresql
+      - sonarqube_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      start_period: 1m
+      start_interval: 5s
+      interval: 1m
+      timeout: 10s
+      retries: 3
 
   sonarqube:
     image: adrianmusante/sonarqube # Recommended to specify a tag with a major or minor version (e.g., 10 or 10.6)
     container_name: sonarqube
     depends_on:
-      - sonarqube_db
+      sonarqube-db:
+        condition: service_healthy
+    restart: unless-stopped
     environment:
-      - SONARQUBE_DATABASE_HOST=sonarqube_db
+      - SONARQUBE_DATABASE_HOST=sonarqube-db
       - SONARQUBE_DATABASE_PORT_NUMBER=5432
       - SONARQUBE_DATABASE_NAME=sonardb
       - SONARQUBE_DATABASE_USER=sonar
