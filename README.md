@@ -71,7 +71,7 @@ This SonarQube image inherits all environment variables from [Bitnami SonarQube]
 
 ##### sonarqube-community-branch-plugin
 
-- `SONARQUBE_PR_PLUGIN_RESOURCES_URL`: Base URL used to load the images for the PR comments. If the variable is defined as empty the image links are referenced to `sonar.core.serverBaseURL`. Default: `https://raw.githubusercontent.com/mc1arke/sonarqube-community-branch-plugin/master/src/main/resources/static`
+- `SONARQUBE_PR_PLUGIN_RESOURCES_URL`: Base URL used to load the images for the PR comments. If the variable is defined as empty the image links are referenced to `sonar.core.serverBaseURL`. Default: `https://cdn.jsdelivr.net/gh/mc1arke/sonarqube-community-branch-plugin@${SONARQUBE_PR_PLUGIN_VERSION}/src/main/resources/static`
 
 
 

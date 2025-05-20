@@ -34,6 +34,6 @@ export SONARQUBE_EMAIL_FROM_NAME="${SONARQUBE_EMAIL_FROM_NAME:-}"
 
 export SONARQUBE_API_URL="http://127.0.0.1:${SONARQUBE_PORT_NUMBER}$(ensure_url $SONARQUBE_WEB_CONTEXT)/api" # only for internal processes
 export SONARQUBE_WEB_URL="$(ensure_url "${SONARQUBE_WEB_URL:-}")"
-[ -v SONARQUBE_PR_PLUGIN_RESOURCES_URL ] || export SONARQUBE_PR_PLUGIN_RESOURCES_URL=https://raw.githubusercontent.com/mc1arke/sonarqube-community-branch-plugin/master/src/main/resources/static
+[ -v SONARQUBE_PR_PLUGIN_RESOURCES_URL ] || export SONARQUBE_PR_PLUGIN_RESOURCES_URL="https://cdn.jsdelivr.net/gh/mc1arke/sonarqube-community-branch-plugin@${SONARQUBE_PR_PLUGIN_VERSION:-master}/src/main/resources/static"
 export SONARQUBE_EXTRA_SETTINGS="${SONARQUBE_EXTRA_SETTINGS:-}"
 export SONARQUBE_SKIP_MIGRATION="${SONARQUBE_SKIP_MIGRATION:-no}"

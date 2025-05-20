@@ -5,7 +5,10 @@ FROM bitnami/sonarqube:$SONARQUBE_VERSION AS base
 USER root
 
 ARG ADDONS_HOME=/opt/addons
-ENV ADDONS_HOME $ADDONS_HOME
+ARG SONARQUBE_PR_PLUGIN_VERSION
+
+ENV ADDONS_HOME=$ADDONS_HOME \
+    SONARQUBE_PR_PLUGIN_VERSION=$SONARQUBE_PR_PLUGIN_VERSION
 
 
 FROM base AS build
@@ -13,7 +16,6 @@ FROM base AS build
 ARG PLUGINS_DIR="$ADDONS_HOME/plugins"
 RUN mkdir -p "$PLUGINS_DIR"
 
-ARG SONARQUBE_PR_PLUGIN_VERSION
 ADD "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONARQUBE_PR_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONARQUBE_PR_PLUGIN_VERSION}.jar" "$PLUGINS_DIR/sonarqube-community-branch-plugin.jar"
 
 COPY addons $ADDONS_HOME
