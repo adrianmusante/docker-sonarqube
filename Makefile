@@ -7,7 +7,8 @@ DOCKER_REGISTRY=
 extract-files:
 	[ -z "$$SONARQUBE_VERSION" ] && SONARQUBE_VERSION="$$(grep '^ARG SONARQUBE_VERSION=' ./sonarqube/Dockerfile | cut -d '=' -f2)" ; \
 	[ -z "$$SONARQUBE_VERSION" ] && echo "Missing SONARQUBE_VERSION !!" && exit 1; \
-	BACKUP_VERSION_DIR="$(BACKUP_DIR)/$$SONARQUBE_VERSION" && rm -rdf "$$BACKUP_VERSION_DIR" && mkdir -p "$$BACKUP_VERSION_DIR" \
+	set -eux; \
+	BACKUP_VERSION_DIR="$(BACKUP_DIR)/$$SONARQUBE_VERSION" && rm -rdf "$$BACKUP_VERSION_DIR" && mkdir -p "$$BACKUP_VERSION_DIR/scripts" "$$BACKUP_VERSION_DIR/sonarqube/web" && chmod -R 777 "$$BACKUP_VERSION_DIR" \
 		&& echo "Extracting scripts to directory: $$BACKUP_VERSION_DIR" \
 		&& docker run --rm --entrypoint= -u "$$(id -u):$$(id -g)" -v "$$BACKUP_VERSION_DIR/scripts:/bkp" bitnami/sonarqube:$$SONARQUBE_VERSION cp -Rv /opt/bitnami/scripts/. /bkp \
 		&& docker run --rm --entrypoint= -u "$$(id -u):$$(id -g)" -v "$$BACKUP_VERSION_DIR/sonarqube/web:/bkp" bitnami/sonarqube:$$SONARQUBE_VERSION cp -Rv /opt/bitnami/sonarqube/web/. /bkp \
@@ -15,7 +16,8 @@ extract-files:
 
 reset-volumes:
 	docker compose down || true; \
-	sudo chmod 777 "$(DATA_DIR)" || true; \
+	mkdir -p "$(LOCAL_DIR)" "$(DATA_DIR)"; \
+	sudo chmod 777 "$(LOCAL_DIR)" "$(DATA_DIR)" || true; \
 	SONARQUBE_DIR=$(DATA_DIR)/sonarqube && sudo rm -rdf $$SONARQUBE_DIR && mkdir -p $$SONARQUBE_DIR && sudo chmod -R 777 $$SONARQUBE_DIR && sudo chown -R 1001:1001 $$SONARQUBE_DIR \
 	&& DB_DIR=$(DATA_DIR)/sonarqube_db && sudo rm -rdf $$DB_DIR && mkdir -p $$DB_DIR && sudo chmod -R 777 $$DB_DIR && sudo chown -R 1001:1001 $$DB_DIR
 

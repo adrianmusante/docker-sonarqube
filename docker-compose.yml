@@ -26,6 +26,8 @@ services:
     restart: unless-stopped
     build:
       context: sonarqube
+      args:
+        BUILD_TAG: 0.0.0@000000
     depends_on:
       sonarqube-db:
         condition: service_healthy

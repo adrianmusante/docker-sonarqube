@@ -1,6 +1,9 @@
 #!/bin/bash
 
-echo "Running SonarQube (init) for user: $(id)"
+info "Running SonarQube v$SONARQUBE_VERSION (build: $BUILD_TAG)"
+debug "USER: $(id)"
+debug "HOSTNAME: $(hostname)"
+debug "PATH: $PATH"
 
 . "$ADDONS_HOME/scripts/sonarqube-env.sh"
 
