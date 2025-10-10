@@ -25,7 +25,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 RUN set -eux; export DEBIAN_FRONTEND=noninteractive && apt-get update -yq \
     && apt-get install -y --no-install-recommends \
-      procps fontconfig locales tzdata binutils curl ca-certificates  \
+      procps fontconfig locales tzdata binutils acl curl ca-certificates  \
       postgresql-client \
     && update-ca-certificates --fresh \
     && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -46,12 +46,16 @@ RUN set -eux; export DEBIAN_FRONTEND=noninteractive && apt-get update -yq \
 
 
 ARG ADDONS_HOME=/opt/addons
-ARG SONARQUBE_VERSION
 ARG SONARQUBE_HOME=/opt/sonarqube
+ARG SONARQUBE_VOLUME_DIR=/sonarqube
+ARG SONARQUBE_PORT_NUMBER=9000
+ARG SONARQUBE_VERSION
 ARG SONARQUBE_PR_PLUGIN_VERSION
 
 ENV ADDONS_HOME=$ADDONS_HOME \
     SONARQUBE_HOME=$SONARQUBE_HOME \
+    SONARQUBE_VOLUME_DIR=$SONARQUBE_VOLUME_DIR \
+    SONARQUBE_PORT_NUMBER=$SONARQUBE_PORT_NUMBER \
     SONARQUBE_VERSION=$SONARQUBE_VERSION \
     SONARQUBE_PR_PLUGIN_VERSION=$SONARQUBE_PR_PLUGIN_VERSION
 
@@ -82,6 +86,12 @@ RUN set -eux; \
     && unzip -DD -q /tmp/sonarqube-webapp.zip -d /tmp/sonarqube-webapp \
     && rsync -a --checksum --delete /tmp/sonarqube-webapp/ "./$SONARQUBE_HOME/web/" \
     && cd "./$SONARQUBE_HOME" \
+    && chown $uid:$gid . \
+    && for dir in conf data elasticsearch/config extensions logs pids temp ; do \
+        mkdir -p "$dir"; \
+        chown -R $uid:$gid "$dir"; \
+      done \
+    && find ./bin/linux-*/ -type f -name sonar.sh -exec sed -i 's|PIDDIR=".*"|PIDDIR="\${SONARQUBE_PID_DIR:-\$PWD/pids}"|g' {} + \
     && rm -rdf ./jres ./bin/win* ./bin/mac* \
     && rm -rdf /tmp/*
 
@@ -101,6 +111,9 @@ ARG BUILD_DIR
 COPY --from=build "$BUILD_DIR" /
 
 USER $uid
+
+EXPOSE $SONARQUBE_PORT_NUMBER
+VOLUME $SONARQUBE_VOLUME_DIR
 
 ARG BUILD_TAG
 ENV BUILD_TAG="$BUILD_TAG"
