@@ -55,10 +55,10 @@ When you start the SonarQube image, you can adjust the configuration of the inst
 
     ```yaml
     sonarqube:
-      ...
+      # ...
       environment:
         - USER_DEFINED_KEY=custom_value
-      ...
+      # ...
     ```
 
 - For manual execution add a `--env` option with each variable and value:
@@ -70,8 +70,6 @@ When you start the SonarQube image, you can adjust the configuration of the inst
       --volume /path/to/sonarqube-persistence:/sonarqube \
       adrianmusante/sonarqube:latest
     ```
-
-Available environment variables:
 
 #### Customizable environment variables
 
@@ -111,6 +109,9 @@ Available environment variables:
 | `SONARQUBE_DATABASE_PASSWORD`           | Database user password.                                                                                                                                                               | `nil`                                                                                                                            |
 | `SONARQUBE_PR_PLUGIN_RESOURCES_URL`     | Base URL used to load the images for the PR comments. If the variable is defined as empty the image links are referenced to `sonar.core.serverBaseURL`.                               | `https://cdn.jsdelivr.net/gh/mc1arke/sonarqube-community-branch-plugin@${SONARQUBE_PR_PLUGIN_VERSION}/src/main/resources/static` |
 
+> [!NOTE]
+> It is possible to provide environment variables using the _FILE suffix. The value will be read from the file specified by the environment variable, following the standard Docker secrets handling mechanism. 
+> This allows you to securely inject sensitive data (such as passwords) into the container without exposing them directly in environment variables.
 
 #### Read-only environment variables
 
@@ -133,13 +134,12 @@ Available environment variables:
 | `SONARQUBE_DAEMON_GROUP_ID`       | SonarQube system group.                              | `1001`                                     |
 | `SONARQUBE_DEFAULT_DATABASE_HOST` | Default database server host.                        | `postgresql`                               |
 
+
 ### Persisting your application
 
 If you remove the container all your data will be lost, and the next time you run the image the database will be reinitialized. To avoid this loss of data, you should mount a volume that will persist even after the container is removed.
 
 For persistence you should mount a directory at the `/sonarqube` path. If the mounted directory is empty, it will be initialized on the first run. Additionally you should mount a volume for persistence of the PostgreSQL data.
-
-The above examples define the Docker volumes named `sonarqube_db` and `sonarqube`. The SonarQube&trade; application state will persist as long as volumes are not removed.
 
 To avoid inadvertent removal of volumes, you can [mount host directories as data volumes](https://docs.docker.com/engine/tutorials/dockervolumes/). Alternatively you can make use of volume plugins to host the volume data.
 
@@ -184,7 +184,6 @@ $ chmod -R 777 /path/to/sonarqube
 ```
 
 
-
 ### Health check
 
 The SonarQube image includes a health check command that verifies if the SonarQube web application is up and running. The health check tries to connect to the SonarQube web application port (default: `9000`) and analyzes the state of the application by querying the `/api/system/status` endpoint. The health check will be successful when the application status is `UP` or any other status provided via the `-s` option of the `health-check` command line tool (see below).
@@ -221,7 +220,7 @@ For example, to add the health check to your `docker-compose.yml` file, you can 
 ```yaml
 services:
   sonarqube:
-    ...
+    # ...
     healthcheck:
       # if SONARQUBE_SKIP_MIGRATION is set to true, it is recommended to use:
       #   test: health-check -s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING
@@ -234,6 +233,7 @@ services:
 ```
 > [!IMPORTANT]
 > The health check will fail if the SonarQube instance is not fully started, including the case when a database migration is required or is in progress. If you set the `SONARQUBE_SKIP_MIGRATION` environment variable to `yes`, it is recommended to use the `-s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING` options to consider these states as healthy.
+
 
 ## Issues
 
