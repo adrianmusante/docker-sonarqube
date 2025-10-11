@@ -85,8 +85,8 @@ Available environment variables:
 | `SONARQUBE_EMAIL_FROM_NAME`             | Emails will come from this address name, e.g. `SonarQube`.                                                                                                                            | `nil`                                                                                                                             |
 | `SONARQUBE_DATABASE_HOST`               | Database server host.                                                                                                                                                                 | `$SONARQUBE_DEFAULT_DATABASE_HOST`                                                                                                |
 | `SONARQUBE_DATABASE_PORT_NUMBER`        | Database server port.                                                                                                                                                                 | `5432`                                                                                                                            |
-| `SONARQUBE_DATABASE_NAME`               | Database name.                                                                                                                                                                        | `bitnami_sonarqube`                                                                                                               |
-| `SONARQUBE_DATABASE_USER`               | Database user name.                                                                                                                                                                   | `bn_sonarqube`                                                                                                                    |
+| `SONARQUBE_DATABASE_NAME`               | Database name.                                                                                                                                                                        | `sonarqube_db`                                                                                                                    |
+| `SONARQUBE_DATABASE_USER`               | Database user name.                                                                                                                                                                   | `sonarqube`                                                                                                                       |
 | `SONARQUBE_DATABASE_PASSWORD`           | Database user password.                                                                                                                                                               | `nil`                                                                                                                             |
 | `SONARQUBE_PR_PLUGIN_RESOURCES_URL`     | Base URL used to load the images for the PR comments. If the variable is defined as empty the image links are referenced to `sonar.core.serverBaseURL`.                               | `https://cdn.jsdelivr.net/gh/mc1arke/sonarqube-community-branch-plugin@${SONARQUBE_PR_PLUGIN_VERSION}/src/main/resources/static`  |
 
@@ -95,16 +95,16 @@ Available environment variables:
 
 | Name                              | Description                                          | Value                                      |
 |-----------------------------------|------------------------------------------------------|--------------------------------------------|
-| `SONARQUBE_BASE_DIR`              | SonarQube installation directory.                    | `/opt/sonarqube`                           |
-| `SONARQUBE_DATA_DIR`              | Directory for SonarQube data files.                  | `${SONARQUBE_BASE_DIR}/data`               |
-| `SONARQUBE_EXTENSIONS_DIR`        | Directory for SonarQube extensions.                  | `${SONARQUBE_BASE_DIR}/extensions`         |
-| `SONARQUBE_CONF_DIR`              | Directory for SonarQube configuration files.         | `${SONARQUBE_BASE_DIR}/conf`               |
+| `SONARQUBE_HOME`                  | SonarQube installation directory.                    | `/opt/sonarqube`                           |
+| `SONARQUBE_DATA_DIR`              | Directory for SonarQube data files.                  | `${SONARQUBE_HOME}/data`                   |
+| `SONARQUBE_EXTENSIONS_DIR`        | Directory for SonarQube extensions.                  | `${SONARQUBE_HOME}/extensions`             |
+| `SONARQUBE_CONF_DIR`              | Directory for SonarQube configuration files.         | `${SONARQUBE_HOME}/conf`                   |
 | `SONARQUBE_CONF_FILE`             | Configuration file for SonarQube.                    | `${SONARQUBE_CONF_DIR}/sonar.properties`   |
-| `SONARQUBE_LOGS_DIR`              | Directory for SonarQube log files.                   | `${SONARQUBE_BASE_DIR}/logs`               |
+| `SONARQUBE_LOGS_DIR`              | Directory for SonarQube log files.                   | `${SONARQUBE_HOME}/logs`                   |
 | `SONARQUBE_LOG_FILE`              | SonarQube log file.                                  | `${SONARQUBE_LOGS_DIR}/sonar.log`          |
-| `SONARQUBE_TMP_DIR`               | Directory for SonarQube temporary files.             | `${SONARQUBE_BASE_DIR}/temp`               |
-| `SONARQUBE_PID_DIR`               | SonarQube directory for PID file.                    | `${SONARQUBE_BASE_DIR}/pids` |
-| `SONARQUBE_BIN_DIR`               | SonarQube directory for binary executables.          | `${SONARQUBE_BASE_DIR}/bin/linux-x86-64`   |
+| `SONARQUBE_TMP_DIR`               | Directory for SonarQube temporary files.             | `${SONARQUBE_HOME}/temp`                   |
+| `SONARQUBE_PID_DIR`               | SonarQube directory for PID file.                    | `${SONARQUBE_HOME}/pids`                   |
+| `SONARQUBE_BIN_DIR`               | SonarQube directory for binary executables.          | `${SONARQUBE_HOME}/bin/linux-x86-64`       |
 | `SONARQUBE_VOLUME_DIR`            | SonarQube directory for mounted configuration files. | `/sonarqube`                               |
 | `SONARQUBE_DAEMON_USER`           | SonarQube system user.                               | `sonarqube`                                |
 | `SONARQUBE_DAEMON_USER_ID`        | SonarQube system user ID.                            | `1001`                                     |
