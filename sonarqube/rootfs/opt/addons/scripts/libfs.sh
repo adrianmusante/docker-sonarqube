@@ -14,15 +14,15 @@
 #   None
 #########################
 owned_by() {
-    local path="${1:?path is missing}"
-    local owner="${2:?owner is missing}"
-    local group="${3:-}"
+  local path="${1:?path is missing}"
+  local owner="${2:?owner is missing}"
+  local group="${3:-}"
 
-    if [[ -n $group ]]; then
-        chown "$owner":"$group" "$path"
-    else
-        chown "$owner":"$owner" "$path"
-    fi
+  if [[ -n $group ]]; then
+    chown "$owner":"$group" "$path"
+  else
+    chown "$owner":"$owner" "$path"
+  fi
 }
 
 ########################
@@ -34,14 +34,14 @@ owned_by() {
 #   None
 #########################
 ensure_dir_exists() {
-    local dir="${1:?directory is missing}"
-    local owner_user="${2:-}"
-    local owner_group="${3:-}"
+  local dir="${1:?directory is missing}"
+  local owner_user="${2:-}"
+  local owner_group="${3:-}"
 
-    [ -d "${dir}" ] || mkdir -p "${dir}"
-    if [[ -n $owner_user ]]; then
-        owned_by "$dir" "$owner_user" "$owner_group"
-    fi
+  [ -d "${dir}" ] || mkdir -p "${dir}"
+  if [[ -n $owner_user ]]; then
+    owned_by "$dir" "$owner_user" "$owner_group"
+  fi
 }
 
 ########################
@@ -52,14 +52,14 @@ ensure_dir_exists() {
 #   boolean
 #########################
 is_dir_empty() {
-    local -r path="${1:?missing directory}"
-    # Calculate real path in order to avoid issues with symlinks
-    local -r dir="$(realpath "$path")"
-    if [[ ! -e "$dir" ]] || [[ -z "$(ls -A "$dir")" ]]; then
-        true
-    else
-        false
-    fi
+  local -r path="${1:?missing directory}"
+  # Calculate real path in order to avoid issues with symlinks
+  local -r dir="$(realpath "$path")"
+  if [[ ! -e "$dir" ]] || [[ -z "$(ls -A "$dir")" ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -70,13 +70,13 @@ is_dir_empty() {
 #   boolean
 #########################
 is_mounted_dir_empty() {
-    local dir="${1:?missing directory}"
+  local dir="${1:?missing directory}"
 
-    if is_dir_empty "$dir" || find "$dir" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" -exec false {} +; then
-        true
-    else
-        false
-    fi
+  if is_dir_empty "$dir" || find "$dir" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" -exec false {} +; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -87,15 +87,15 @@ is_mounted_dir_empty() {
 #   boolean
 #########################
 is_file_writable() {
-    local file="${1:?missing file}"
-    local dir
-    dir="$(dirname "$file")"
+  local file="${1:?missing file}"
+  local dir
+  dir="$(dirname "$file")"
 
-    if [[ (-f "$file" && -w "$file") || (! -f "$file" && -d "$dir" && -w "$dir") ]]; then
-        true
-    else
-        false
-    fi
+  if [[ (-f "$file" && -w "$file") || (! -f "$file" && -d "$dir" && -w "$dir") ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -107,11 +107,11 @@ is_file_writable() {
 #   None
 #########################
 relativize() {
-    local -r path="${1:?missing path}"
-    local -r base="${2:?missing base}"
-    pushd "$base" >/dev/null || exit
-    realpath -q --no-symlinks --relative-base="$base" "$path" | sed -e 's|^/$|.|' -e 's|^/||'
-    popd >/dev/null || exit
+  local -r path="${1:?missing path}"
+  local -r base="${2:?missing base}"
+  pushd "$base" >/dev/null || exit
+  realpath -q --no-symlinks --relative-base="$base" "$path" | sed -e 's|^/$|.|' -e 's|^/||'
+  popd >/dev/null || exit
 }
 
 ########################
@@ -129,61 +129,61 @@ relativize() {
 #   None
 #########################
 configure_permissions_ownership() {
-    local -r paths="${1:?paths is missing}"
-    local dir_mode=""
-    local file_mode=""
-    local user=""
-    local group=""
+  local -r paths="${1:?paths is missing}"
+  local dir_mode=""
+  local file_mode=""
+  local user=""
+  local group=""
 
-    # Validate arguments
-    shift 1
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-        -f | --file-mode)
-            shift
-            file_mode="${1:?missing mode for files}"
-            ;;
-        -d | --dir-mode)
-            shift
-            dir_mode="${1:?missing mode for directories}"
-            ;;
-        -u | --user)
-            shift
-            user="${1:?missing user}"
-            ;;
-        -g | --group)
-            shift
-            group="${1:?missing group}"
-            ;;
-        *)
-            echo "Invalid command line flag $1" >&2
-            return 1
-            ;;
-        esac
-        shift
-    done
+  # Validate arguments
+  shift 1
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+    -f | --file-mode)
+      shift
+      file_mode="${1:?missing mode for files}"
+      ;;
+    -d | --dir-mode)
+      shift
+      dir_mode="${1:?missing mode for directories}"
+      ;;
+    -u | --user)
+      shift
+      user="${1:?missing user}"
+      ;;
+    -g | --group)
+      shift
+      group="${1:?missing group}"
+      ;;
+    *)
+      echo "Invalid command line flag $1" >&2
+      return 1
+      ;;
+    esac
+    shift
+  done
 
-    read -r -a filepaths <<<"$paths"
-    for p in "${filepaths[@]}"; do
-        if [[ -e "$p" ]]; then
-            find -L "$p" -printf ""
-            if [[ -n $dir_mode ]]; then
-                find -L "$p" -type d ! -perm "$dir_mode" -print0 | xargs -r -0 chmod "$dir_mode"
-            fi
-            if [[ -n $file_mode ]]; then
-                find -L "$p" -type f ! -perm "$file_mode" -print0 | xargs -r -0 chmod "$file_mode"
-            fi
-            if [[ -n $user ]] && [[ -n $group ]]; then
-                find -L "$p" -print0 | xargs -r -0 chown "${user}:${group}"
-            elif [[ -n $user ]] && [[ -z $group ]]; then
-                find -L "$p" -print0 | xargs -r -0 chown "${user}"
-            elif [[ -z $user ]] && [[ -n $group ]]; then
-                find -L "$p" -print0 | xargs -r -0 chgrp "${group}"
-            fi
-        else
-            stderr_print "$p does not exist"
-        fi
-    done
+  read -r -a filepaths <<<"$paths"
+  for p in "${filepaths[@]}"; do
+    if [[ -e "$p" ]]; then
+      find -L "$p" -printf ""
+      if [[ -n $dir_mode ]]; then
+        find -L "$p" -type d ! -perm "$dir_mode" -print0 | xargs -r -0 chmod "$dir_mode"
+      fi
+      if [[ -n $file_mode ]]; then
+        find -L "$p" -type f ! -perm "$file_mode" -print0 | xargs -r -0 chmod "$file_mode"
+      fi
+      if [[ -n $user ]] && [[ -n $group ]]; then
+        find -L "$p" -print0 | xargs -r -0 chown "${user}:${group}"
+      elif [[ -n $user ]] && [[ -z $group ]]; then
+        find -L "$p" -print0 | xargs -r -0 chown "${user}"
+      elif [[ -z $user ]] && [[ -n $group ]]; then
+        find -L "$p" -print0 | xargs -r -0 chgrp "${group}"
+      fi
+    else
+      stderr_print "$p does not exist"
+    fi
+  done
 }
 
 ensure_directory() {
@@ -218,23 +218,23 @@ ensure_directory() {
 #   None
 #########################
 replace_in_file() {
-    local filename="${1:?filename is required}"
-    local match_regex="${2:?match regex is required}"
-    local substitute_regex="${3:?substitute regex is required}"
-    local posix_regex=${4:-true}
+  local filename="${1:?filename is required}"
+  local match_regex="${2:?match regex is required}"
+  local substitute_regex="${3:?substitute regex is required}"
+  local posix_regex=${4:-true}
 
-    local result
+  local result
 
-    # We should avoid using 'sed in-place' substitutions
-    # 1) They are not compatible with files mounted from ConfigMap(s)
-    # 2) We found incompatibility issues with Debian10 and "in-place" substitutions
-    local -r del=$'\001' # Use a non-printable character as a 'sed' delimiter to avoid issues
-    if [[ $posix_regex = true ]]; then
-        result="$(sed -E "s${del}${match_regex}${del}${substitute_regex}${del}g" "$filename")"
-    else
-        result="$(sed "s${del}${match_regex}${del}${substitute_regex}${del}g" "$filename")"
-    fi
-    echo "$result" > "$filename"
+  # We should avoid using 'sed in-place' substitutions
+  # 1) They are not compatible with files mounted from ConfigMap(s)
+  # 2) We found incompatibility issues with Debian10 and "in-place" substitutions
+  local -r del=$'\001' # Use a non-printable character as a 'sed' delimiter to avoid issues
+  if [[ $posix_regex = true ]]; then
+    result="$(sed -E "s${del}${match_regex}${del}${substitute_regex}${del}g" "$filename")"
+  else
+    result="$(sed "s${del}${match_regex}${del}${substitute_regex}${del}g" "$filename")"
+  fi
+  echo "$result" > "$filename"
 }
 
 ########################
@@ -247,14 +247,14 @@ replace_in_file() {
 #   None
 #########################
 replace_in_file_multiline() {
-    local filename="${1:?filename is required}"
-    local match_regex="${2:?match regex is required}"
-    local substitute_regex="${3:?substitute regex is required}"
+  local filename="${1:?filename is required}"
+  local match_regex="${2:?match regex is required}"
+  local substitute_regex="${3:?substitute regex is required}"
 
-    local result
-    local -r del=$'\001' # Use a non-printable character as a 'sed' delimiter to avoid issues
-    result="$(perl -pe "BEGIN{undef $/;} s${del}${match_regex}${del}${substitute_regex}${del}sg" "$filename")"
-    echo "$result" > "$filename"
+  local result
+  local -r del=$'\001' # Use a non-printable character as a 'sed' delimiter to avoid issues
+  result="$(perl -pe "BEGIN{undef $/;} s${del}${match_regex}${del}${substitute_regex}${del}sg" "$filename")"
+  echo "$result" > "$filename"
 }
 
 ########################
@@ -267,20 +267,20 @@ replace_in_file_multiline() {
 #   None
 #########################
 remove_in_file() {
-    local filename="${1:?filename is required}"
-    local match_regex="${2:?match regex is required}"
-    local posix_regex=${3:-true}
-    local result
+  local filename="${1:?filename is required}"
+  local match_regex="${2:?match regex is required}"
+  local posix_regex=${3:-true}
+  local result
 
-    # We should avoid using 'sed in-place' substitutions
-    # 1) They are not compatible with files mounted from ConfigMap(s)
-    # 2) We found incompatibility issues with Debian10 and "in-place" substitutions
-    if [[ $posix_regex = true ]]; then
-        result="$(sed -E "/$match_regex/d" "$filename")"
-    else
-        result="$(sed "/$match_regex/d" "$filename")"
-    fi
-    echo "$result" > "$filename"
+  # We should avoid using 'sed in-place' substitutions
+  # 1) They are not compatible with files mounted from ConfigMap(s)
+  # 2) We found incompatibility issues with Debian10 and "in-place" substitutions
+  if [[ $posix_regex = true ]]; then
+    result="$(sed -E "/$match_regex/d" "$filename")"
+  else
+    result="$(sed "/$match_regex/d" "$filename")"
+  fi
+  echo "$result" > "$filename"
 }
 
 ########################
@@ -293,13 +293,13 @@ remove_in_file() {
 #   None
 #########################
 append_file_after_last_match() {
-    local file="${1:?missing file}"
-    local match_regex="${2:?missing pattern}"
-    local value="${3:?missing value}"
+  local file="${1:?missing file}"
+  local match_regex="${2:?missing pattern}"
+  local value="${3:?missing value}"
 
-    # We read the file in reverse, replace the first match (0,/pattern/s) and then reverse the results again
-    result="$(tac "$file" | sed -E "0,/($match_regex)/s||${value}\n\1|" | tac)"
-    echo "$result" > "$file"
+  # We read the file in reverse, replace the first match (0,/pattern/s) and then reverse the results again
+  result="$(tac "$file" | sed -E "0,/($match_regex)/s||${value}\n\1|" | tac)"
+  echo "$result" > "$file"
 }
 
 ########################
@@ -313,25 +313,25 @@ append_file_after_last_match() {
 #   Boolean
 #########################
 wait_for_log_entry() {
-    local -r entry="${1:-missing entry}"
-    local -r log_file="${2:-missing log file}"
-    local -r retries="${3:-12}"
-    local -r interval_time="${4:-5}"
-    local attempt=0
+  local -r entry="${1:-missing entry}"
+  local -r log_file="${2:-missing log file}"
+  local -r retries="${3:-12}"
+  local -r interval_time="${4:-5}"
+  local attempt=0
 
-    check_log_file_for_entry() {
-        if ! grep -qE "$entry" "$log_file"; then
-            debug "Entry \"${entry}\" still not present in ${log_file} (attempt $((++attempt))/${retries})"
-            return 1
-        fi
-    }
-    debug "Checking that ${log_file} log file contains entry \"${entry}\""
-    if retry_while check_log_file_for_entry "$retries" "$interval_time"; then
-        debug "Found entry \"${entry}\" in ${log_file}"
-        true
-    else
-        error "Could not find entry \"${entry}\" in ${log_file} after ${retries} retries"
-        debug_execute cat "$log_file"
-        return 1
+  check_log_file_for_entry() {
+    if ! grep -qE "$entry" "$log_file"; then
+      debug "Entry \"${entry}\" still not present in ${log_file} (attempt $((++attempt))/${retries})"
+      return 1
     fi
+  }
+  debug "Checking that ${log_file} log file contains entry \"${entry}\""
+  if retry_while check_log_file_for_entry "$retries" "$interval_time"; then
+    debug "Found entry \"${entry}\" in ${log_file}"
+    true
+  else
+    error "Could not find entry \"${entry}\" in ${log_file} after ${retries} retries"
+    debug_execute cat "$log_file"
+    return 1
+  fi
 }

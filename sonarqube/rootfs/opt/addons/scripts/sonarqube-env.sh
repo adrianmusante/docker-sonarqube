@@ -5,8 +5,8 @@
 . "$ADDONS_HOME/scripts/libutil.sh"
 
 if is_boolean_yes "${SONARQUBE_ENV_LOADED:-false}"; then
-    debug "SonarQube environment variables already loaded"
-    return
+  debug "SonarQube environment variables already loaded"
+  return
 fi
 
 sonarqube_build_vars=(
@@ -19,63 +19,63 @@ sonarqube_build_vars=(
   SONARQUBE_DAEMON_GROUP_ID
 )
 for env_var in "${sonarqube_build_vars[@]}"; do
-    [[ -n "${!env_var:-}" ]] || do_error "The environment variable ${env_var} is not set. The variable should be set at build time."
+  [[ -n "${!env_var:-}" ]] || do_error "The environment variable ${env_var} is not set. The variable should be set at build time."
 done
 unset sonarqube_build_vars
 
 # By setting an environment variable matching *_FILE to a file path, the prefixed environment
 # variable will be overridden with the value specified in that file
 sonarqube_env_vars=(
-    SONARQUBE_MOUNTED_PROVISIONING_DIR
-    SONARQUBE_DATA_TO_PERSIST
-    SONARQUBE_PORT_NUMBER
-    SONARQUBE_ELASTICSEARCH_PORT_NUMBER
-    SONARQUBE_START_TIMEOUT
-    SONARQUBE_SKIP_BOOTSTRAP
-    SONARQUBE_WEB_CONTEXT
-    SONARQUBE_MAX_HEAP_SIZE
-    SONARQUBE_MIN_HEAP_SIZE
-    SONARQUBE_CE_JAVA_ADD_OPTS
-    SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS
-    SONARQUBE_WEB_JAVA_ADD_OPTS
-    SONARQUBE_EXTRA_PROPERTIES
-    SONARQUBE_USERNAME
-    SONARQUBE_PASSWORD
-    SONARQUBE_EMAIL
-    SONARQUBE_SMTP_HOST
-    SONARQUBE_SMTP_PORT_NUMBER
-    SONARQUBE_SMTP_USER
-    SONARQUBE_SMTP_PASSWORD
-    SONARQUBE_SMTP_PROTOCOL
-    SONARQUBE_DATABASE_HOST
-    SONARQUBE_DATABASE_PORT_NUMBER
-    SONARQUBE_DATABASE_NAME
-    SONARQUBE_DATABASE_USER
-    SONARQUBE_DATABASE_PASSWORD
-    SONARQUBE_PROPERTIES
-    SMTP_HOST
-    SMTP_PORT
-    SONARQUBE_SMTP_PORT
-    SMTP_USER
-    SMTP_PASSWORD
-    SMTP_PROTOCOL
-    POSTGRESQL_HOST
-    POSTGRESQL_PORT_NUMBER
-    POSTGRESQL_DATABASE_NAME
-    POSTGRESQL_DATABASE_USER
-    POSTGRESQL_DATABASE_USERNAME
-    POSTGRESQL_DATABASE_PASSWORD
+  SONARQUBE_MOUNTED_PROVISIONING_DIR
+  SONARQUBE_DATA_TO_PERSIST
+  SONARQUBE_PORT_NUMBER
+  SONARQUBE_ELASTICSEARCH_PORT_NUMBER
+  SONARQUBE_START_TIMEOUT
+  SONARQUBE_SKIP_BOOTSTRAP
+  SONARQUBE_WEB_CONTEXT
+  SONARQUBE_MAX_HEAP_SIZE
+  SONARQUBE_MIN_HEAP_SIZE
+  SONARQUBE_CE_JAVA_ADD_OPTS
+  SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS
+  SONARQUBE_WEB_JAVA_ADD_OPTS
+  SONARQUBE_EXTRA_PROPERTIES
+  SONARQUBE_USERNAME
+  SONARQUBE_PASSWORD
+  SONARQUBE_EMAIL
+  SONARQUBE_SMTP_HOST
+  SONARQUBE_SMTP_PORT_NUMBER
+  SONARQUBE_SMTP_USER
+  SONARQUBE_SMTP_PASSWORD
+  SONARQUBE_SMTP_PROTOCOL
+  SONARQUBE_DATABASE_HOST
+  SONARQUBE_DATABASE_PORT_NUMBER
+  SONARQUBE_DATABASE_NAME
+  SONARQUBE_DATABASE_USER
+  SONARQUBE_DATABASE_PASSWORD
+  SONARQUBE_PROPERTIES
+  SMTP_HOST
+  SMTP_PORT
+  SONARQUBE_SMTP_PORT
+  SMTP_USER
+  SMTP_PASSWORD
+  SMTP_PROTOCOL
+  POSTGRESQL_HOST
+  POSTGRESQL_PORT_NUMBER
+  POSTGRESQL_DATABASE_NAME
+  POSTGRESQL_DATABASE_USER
+  POSTGRESQL_DATABASE_USERNAME
+  POSTGRESQL_DATABASE_PASSWORD
 )
 for env_var in "${sonarqube_env_vars[@]}"; do
-    file_env_var="${env_var}_FILE"
-    if [[ -n "${!file_env_var:-}" ]]; then
-        if [[ -r "${!file_env_var:-}" ]]; then
-            export "${env_var}=$(< "${!file_env_var}")"
-            unset "${file_env_var}"
-        else
-            warn "Skipping export of '${env_var}'. '${!file_env_var:-}' is not readable."
-        fi
+  file_env_var="${env_var}_FILE"
+  if [[ -n "${!file_env_var:-}" ]]; then
+    if [[ -r "${!file_env_var:-}" ]]; then
+      export "${env_var}=$(< "${!file_env_var}")"
+      unset "${file_env_var}"
+    else
+      warn "Skipping export of '${env_var}'. '${!file_env_var:-}' is not readable."
     fi
+  fi
 done
 unset sonarqube_env_vars
 

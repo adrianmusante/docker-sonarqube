@@ -20,18 +20,18 @@
 #   None
 #########################
 postgresql_execute_print_output() {
-    local -r db="${1:-}"
-    local -r user="${2:-postgres}"
-    local -r pass="${3:-}"
-    local opts
-    read -r -a opts <<<"${@:4}"
+  local -r db="${1:-}"
+  local -r user="${2:-postgres}"
+  local -r pass="${3:-}"
+  local opts
+  read -r -a opts <<<"${@:4}"
 
-    local args=("-U" "$user" "-p" "${POSTGRESQL_PORT_NUMBER:-5432}" "-h" "127.0.0.1")
-    [[ -n "$db" ]] && args+=("-d" "$db")
-    [[ "${#opts[@]}" -gt 0 ]] && args+=("${opts[@]}")
+  local args=("-U" "$user" "-p" "${POSTGRESQL_PORT_NUMBER:-5432}" "-h" "127.0.0.1")
+  [[ -n "$db" ]] && args+=("-d" "$db")
+  [[ "${#opts[@]}" -gt 0 ]] && args+=("${opts[@]}")
 
-    # Execute the Query/queries from stdin
-    PGPASSWORD=$pass psql "${args[@]}"
+  # Execute the Query/queries from stdin
+  PGPASSWORD=$pass psql "${args[@]}"
 }
 
 ########################
@@ -50,13 +50,13 @@ postgresql_execute_print_output() {
 #   None
 #########################
 postgresql_execute() {
-    if [[ "${SONARQUBE_DEBUG:-false}" = true ]]; then
-        "postgresql_execute_print_output" "$@"
-    elif [[ "${NO_ERRORS:-false}" = true ]]; then
-        "postgresql_execute_print_output" "$@" 2>/dev/null
-    else
-        "postgresql_execute_print_output" "$@" >/dev/null 2>&1
-    fi
+  if [[ "${SONARQUBE_DEBUG:-false}" = true ]]; then
+    "postgresql_execute_print_output" "$@"
+  elif [[ "${NO_ERRORS:-false}" = true ]]; then
+    "postgresql_execute_print_output" "$@" 2>/dev/null
+  else
+    "postgresql_execute_print_output" "$@" >/dev/null 2>&1
+  fi
 }
 
 ########################
@@ -76,11 +76,11 @@ postgresql_execute() {
 # Returns:
 #   None
 postgresql_remote_execute_print_output() {
-    local -r hostname="${1:?hostname is required}"
-    local -r port="${2:?port is required}"
-    local -a args=("-h" "$hostname" "-p" "$port")
-    shift 2
-    "postgresql_execute_print_output" "$@" "${args[@]}"
+  local -r hostname="${1:?hostname is required}"
+  local -r port="${2:?port is required}"
+  local -a args=("-h" "$hostname" "-p" "$port")
+  shift 2
+  "postgresql_execute_print_output" "$@" "${args[@]}"
 }
 
 ########################
@@ -100,12 +100,12 @@ postgresql_remote_execute_print_output() {
 # Returns:
 #   None
 postgresql_remote_execute() {
-    if [[ "${SONARQUBE_DEBUG:-false}" = true ]]; then
-        "postgresql_remote_execute_print_output" "$@"
-    elif [[ "${NO_ERRORS:-false}" = true ]]; then
-        "postgresql_remote_execute_print_output" "$@" 2>/dev/null
-    else
-        "postgresql_remote_execute_print_output" "$@" >/dev/null 2>&1
-    fi
+  if [[ "${SONARQUBE_DEBUG:-false}" = true ]]; then
+    "postgresql_remote_execute_print_output" "$@"
+  elif [[ "${NO_ERRORS:-false}" = true ]]; then
+    "postgresql_remote_execute_print_output" "$@" 2>/dev/null
+  else
+    "postgresql_remote_execute_print_output" "$@" >/dev/null 2>&1
+  fi
 }
 

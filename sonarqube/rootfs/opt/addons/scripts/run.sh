@@ -18,7 +18,7 @@ cd "$SONARQUBE_BASE_DIR"
 
 info "** Starting SonarQube **"
 if am_i_root; then
-    exec_as_user "$SONARQUBE_DAEMON_USER" "${START_CMD[@]}" "$@"
+  exec_as_user "$SONARQUBE_DAEMON_USER" "${START_CMD[@]}" "$@"
 else
-    exec "${START_CMD[@]}" "$@"
+  exec "${START_CMD[@]}" "$@"
 fi

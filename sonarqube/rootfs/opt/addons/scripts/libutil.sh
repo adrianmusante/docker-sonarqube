@@ -130,12 +130,12 @@ ensure_url() { # removes end-slash of url
 #   Boolean
 #########################
 is_int() {
-    local -r int="${1:?missing value}"
-    if [[ "$int" =~ ^-?[0-9]+ ]]; then
-        true
-    else
-        false
-    fi
+  local -r int="${1:?missing value}"
+  if [[ "$int" =~ ^-?[0-9]+ ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -146,12 +146,12 @@ is_int() {
 #   Boolean
 #########################
 is_positive_int() {
-    local -r int="${1:?missing value}"
-    if is_int "$int" && (( "${int}" >= 0 )); then
-        true
-    else
-        false
-    fi
+  local -r int="${1:?missing value}"
+  if is_int "$int" && (( "${int}" >= 0 )); then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -162,14 +162,14 @@ is_positive_int() {
 #   Boolean
 #########################
 is_boolean_yes() {
-    local -r bool="${1:-}"
-    # comparison is performed without regard to the case of alphabetic characters
-    shopt -s nocasematch
-    if [[ "$bool" = 1 || "$bool" =~ ^(yes|true)$ ]]; then
-        true
-    else
-        false
-    fi
+  local -r bool="${1:-}"
+  # comparison is performed without regard to the case of alphabetic characters
+  shopt -s nocasematch
+  if [[ "$bool" = 1 || "$bool" =~ ^(yes|true)$ ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -180,12 +180,12 @@ is_boolean_yes() {
 #   Boolean
 #########################
 is_yes_no_value() {
-    local -r bool="${1:-}"
-    if [[ "$bool" =~ ^(yes|no)$ ]]; then
-        true
-    else
-        false
-    fi
+  local -r bool="${1:-}"
+  if [[ "$bool" =~ ^(yes|no)$ ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -196,12 +196,12 @@ is_yes_no_value() {
 #   Boolean
 #########################
 is_true_false_value() {
-    local -r bool="${1:-}"
-    if [[ "$bool" =~ ^(true|false)$ ]]; then
-        true
-    else
-        false
-    fi
+  local -r bool="${1:-}"
+  if [[ "$bool" =~ ^(true|false)$ ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -212,12 +212,12 @@ is_true_false_value() {
 #   Boolean
 #########################
 is_1_0_value() {
-    local -r bool="${1:-}"
-    if [[ "$bool" =~ ^[10]$ ]]; then
-        true
-    else
-        false
-    fi
+  local -r bool="${1:-}"
+  if [[ "$bool" =~ ^[10]$ ]]; then
+    true
+  else
+    false
+  fi
 }
 
 ########################
@@ -228,10 +228,10 @@ is_1_0_value() {
 #   Boolean
 #########################
 is_empty_value() {
-    local -r val="${1:-}"
-    if [[ -z "$val" ]]; then
-        true
-    else
-        false
-    fi
+  local -r val="${1:-}"
+  if [[ -z "$val" ]]; then
+    true
+  else
+    false
+  fi
 }
