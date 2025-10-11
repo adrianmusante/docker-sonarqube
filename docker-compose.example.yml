@@ -1,6 +1,6 @@
 services:
   sonarqube-db:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     container_name: sonarqube-db
     restart: unless-stopped
     environment:
@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=sonar
       - POSTGRES_DB=sonardb
     volumes:
-      - sonarqube_db:/var/lib/postgresql/data
+      - sonarqube_db:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       start_period: 1m
@@ -35,7 +35,7 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - sonarqube:/bitnami/sonarqube
+      - sonarqube:/sonarqube
     healthcheck:
       # if SONARQUBE_SKIP_MIGRATION is set to true, it is recommended to use:
       #   test: health-check -s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING

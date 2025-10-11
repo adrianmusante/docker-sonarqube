@@ -14,6 +14,7 @@ env:
   DOCKERFILE_PATH: sonarqube/Dockerfile
   DOCKERFILE_VERSION_KEY: SONARQUBE_VERSION
   DOCKERFILE_PR_PLUGIN_VERSION_KEY: SONARQUBE_PR_PLUGIN_VERSION
+  DOCKERFILE_OS_VERSION_KEY: DEBIAN_VERSION
 
 jobs:
   update-version:
@@ -28,32 +29,56 @@ jobs:
       - name: Get latest version
         id: get-latest
         run: |
-          version="$(curl -sSfL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/mc1arke/sonarqube-community-branch-plugin/releases/latest | json_pp | grep '"tag_name"' | cut -d '"' -f4 | tr -d '\\n' | tr -d 'v')"
+          # Retrieve latest pr plugin version
+          pr_plugin_version="$(curl -sSfL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/mc1arke/sonarqube-community-branch-plugin/releases/latest | json_pp | grep '"tag_name"' | cut -d '"' -f4 | tr -d '\\n' | tr -d 'v')"
+          if [ -z "$pr_plugin_version" ]; then echo "Failed to fetch latest version" >&2; exit 1 ; fi
+          
+          # Retrieve SonarQube compilation version by pr plugin version
+          get_sonarqube_version() { curl -sSfL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/SonarSource/sonarqube/releases?per_page=100" | json_pp  | grep '"tag_name"' | cut -d '"' -f4  | grep "^$(echo "$1." | sed 's/\./\\./g')" | head -n 1 || echo ""; }
+          version="$(get_sonarqube_version "$pr_plugin_version")"
           if [ -z "$version" ]; then
-            echo "Failed to fetch latest version" >&2
-            exit 1
+            version="$(get_sonarqube_version "$(echo "$pr_plugin_version" | cut -d'.' -f1,1)")"
+            if [ -z "$version" ]; then
+              echo "::warning::Failed to fetch SonarQube version for pr plugin version $pr_plugin_version" >&2
+              exit 1
+            else
+              echo "::warning::Using minor version match for SonarQube version: $version"
+            fi
           fi
-          # Ensure that the SonarQube Docker image and the plugin use the same version number
-          docker_tag_status=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/bitnami/sonarqube/tags/$version/")
-          if [ "$docker_tag_status" -ne 200 ]; then
-            echo "::warning::Docker tag $version does not exist in bitnami/sonarqube"
-            exit 1
+          
+          # Retrieve OS version
+          os_version="$(curl -sSfL https://deb.debian.org/debian/dists/stable/Release | grep Codename | awk '{print $2}')-slim"
+          docker_debian_tag_status=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/library/debian/tags/$os_version/")
+          if [ "$docker_debian_tag_status" -ne 200 ]; then
+            os_version="$(grep "ARG $DOCKERFILE_OS_VERSION_KEY=" "$DOCKERFILE_PATH" | cut -d '=' -f2 | tr -d '[:space:]')"
+            echo "::warning::Failed to fetch latest Debian version, using existing version: $os_version"
           fi
-          echo "Latest version: $version"          
+          
+          echo "Latest version: $version (pr plugin: $pr_plugin_version, os: $os_version)"
+          echo "pr_plugin_version=$pr_plugin_version" >> $GITHUB_OUTPUT
           echo "version=$version" >> $GITHUB_OUTPUT
+          echo "os_version=$os_version" >> $GITHUB_OUTPUT
       - name: Get current version
         id: get-current
         run: |
-          version="$(grep -Po "ARG $DOCKERFILE_VERSION_KEY=\K[0-9.]*" "$DOCKERFILE_PATH")"
-          echo "Current version: $version"
+          get_version() { grep "ARG $1=" "$DOCKERFILE_PATH" | cut -d '=' -f2 | tr -d '[:space:]'; }
+          pr_plugin_version="$(get_version "$DOCKERFILE_PR_PLUGIN_VERSION_KEY")"
+          version="$(get_version "$DOCKERFILE_VERSION_KEY")"
+          os_version="$(get_version "$DOCKERFILE_OS_VERSION_KEY")"
+          
+          echo "Current version: $version (pr plugin: $pr_plugin_version, os: $os_version)"
+          echo "pr_plugin_version=$pr_plugin_version" >> $GITHUB_OUTPUT
           echo "version=$version" >> $GITHUB_OUTPUT
+          echo "os_version=$os_version" >> $GITHUB_OUTPUT
       - name: Check if update is needed
         id: check
         run: |
-          if [ "${{ steps.get-latest.outputs.version }}" = "${{ steps.get-current.outputs.version }}" ]; then
-            echo "up_to_date=true" >> $GITHUB_OUTPUT
-          else
-            echo "up_to_date=false" >> $GITHUB_OUTPUT
+          if [ "${{ steps.get-latest.outputs.version }}" = "${{ steps.get-current.outputs.version }}" ] \
+            && [ "${{ steps.get-latest.outputs.pr_plugin_version }}" = "${{ steps.get-current.outputs.pr_plugin_version }}" ] \
+            && [ "${{ steps.get-latest.outputs.os_version }}" = "${{ steps.get-current.outputs.os_version }}" ]; then
+              echo "up_to_date=true" >> $GITHUB_OUTPUT
+            else
+              echo "up_to_date=false" >> $GITHUB_OUTPUT
           fi
       - name: Pull request metadata
         if: steps.check.outputs.up_to_date == 'false'
@@ -62,7 +87,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           version="${{ steps.get-latest.outputs.version }}"
-          title="Update $DEPENDENCY_NAME to v$version"
+          title="Update $DEPENDENCY_NAME to v$version (pr plugin: ${{ steps.get-latest.outputs.pr_plugin_version }}, os: ${{ steps.get-latest.outputs.os_version }})"
           prs=$(gh pr list --search "$title" --json title | jq length)
           if [ "$prs" -gt 0 ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
@@ -81,8 +106,10 @@ jobs:
           version="${{ steps.get-latest.outputs.version }}"
           branch="${{ steps.pr.outputs.head_branch }}"
           git checkout -b "$branch"
-          sed -i "s|ARG $DOCKERFILE_VERSION_KEY=.*|ARG $DOCKERFILE_VERSION_KEY=$version|" "$DOCKERFILE_PATH"
-          sed -i "s|ARG $DOCKERFILE_PR_PLUGIN_VERSION_KEY=.*|ARG $DOCKERFILE_PR_PLUGIN_VERSION_KEY=$version|" "$DOCKERFILE_PATH"
+          update_dockerfile_version() { sed -i "s|ARG $1=.*|ARG $1=$2|" "$DOCKERFILE_PATH"; } 
+          update_dockerfile_version "$DOCKERFILE_VERSION_KEY" "$version"
+          update_dockerfile_version "$DOCKERFILE_PR_PLUGIN_VERSION_KEY" "${{ steps.get-latest.outputs.pr_plugin_version }}"
+          update_dockerfile_version "$DOCKERFILE_OS_VERSION_KEY" "${{ steps.get-latest.outputs.os_version }}"
           sed -i -E "s|-\s*\[\`[0-9]+\`,\s*\`[0-9.]+\`,\s*\`latest\` \(${DOCKERFILE_PATH}\)\]|- [\`$(echo "$version" | cut -d'.' -f1,1)\`, \`$(echo "$version" | cut -d'.' -f1,2)\`, \`latest\` (${DOCKERFILE_PATH})]|" README.md
           git commit -am "Update version to $version"
           git push origin "$branch"

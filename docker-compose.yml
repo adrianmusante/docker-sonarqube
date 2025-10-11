@@ -1,7 +1,7 @@
 # This docker-compose is only for local
 services:
   sonarqube-db:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     container_name: sonarqube-db
     restart: unless-stopped
     environment:
@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=sonar
       - POSTGRES_DB=sonardb
     volumes:
-      - ./_local/data/sonarqube_db/data:/var/lib/postgresql/data
+      - ./_local/data/sonarqube_db:/var/lib/postgresql
     ports:
       - "5432:5432"
     healthcheck:
@@ -26,13 +26,15 @@ services:
     restart: unless-stopped
     build:
       context: sonarqube
+      args:
+        BUILD_TAG: 0.0.0@000000
     depends_on:
       sonarqube-db:
         condition: service_healthy
     env_file:
       - .env
     environment:
-      - BITNAMI_DEBUG=${BITNAMI_DEBUG:-true}
+      - SONARQUBE_DEBUG=${SONARQUBE_DEBUG:-true}
       - SONARQUBE_DATABASE_HOST=sonarqube-db
       - SONARQUBE_DATABASE_PORT_NUMBER=5432
       - SONARQUBE_DATABASE_NAME=sonardb
@@ -49,7 +51,7 @@ services:
       - SONARQUBE_EMAIL_FROM_ADDRESS=${SONARQUBE_EMAIL_FROM_ADDRESS:-}
       - SONARQUBE_EMAIL_FROM_NAME=${SONARQUBE_EMAIL_FROM_NAME:-}
     volumes:
-      - ./_local/data/sonarqube:/bitnami/sonarqube
+      - ./_local/data/sonarqube:/sonarqube
     ports:
       - "9000:9000"
     healthcheck:
