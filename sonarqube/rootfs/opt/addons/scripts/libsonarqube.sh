@@ -85,7 +85,10 @@ sonarqube_validate() {
 }
 
 sonarqube_load_extensions() {
-  mkdir -p "$SONARQUBE_VOLUME_DATA_DIR" "$SONARQUBE_VOLUME_PLUGINS_DIR"
+  mkdir -p "$SONARQUBE_VOLUME_DATA_DIR" "$SONARQUBE_VOLUME_PLUGINS_DIR" || {
+    error "Could not create SonarQube volume directories"
+    return 1
+  }
   cp -f "$ADDONS_HOME"/plugins/*.jar "$SONARQUBE_VOLUME_PLUGINS_DIR"
 }
 
@@ -100,7 +103,7 @@ sonarqube_load_extensions() {
 #########################
 sonarqube_initialize() {
   # Load SonarQube extra extensions before any other operation because they could be required during initialization
-  sonarqube_load_extensions
+  sonarqube_load_extensions || return 1
 
   local -a postgresql_execute_args
   read -r -a postgresql_execute_args <<< "$(sonarqube_database_connection_args)"
@@ -140,7 +143,7 @@ sonarqube_initialize() {
 
   # Check if SonarQube has already been initialized and persisted in a previous run
   local -r app_name="sonarqube"
-  if ! is_app_initialized "$app_name"; then
+  if ! is_app_initialized ; then
     # Ensure SonarQube persisted directories exist (i.e. when a volume has been mounted to /sonarqube)
     info "Ensuring SonarQube directories exist"
     ensure_dir_exists "$SONARQUBE_VOLUME_DIR"
@@ -179,10 +182,10 @@ EOF
     sonarqube_stop
 
     info "Persisting SonarQube installation"
-    persist_app "$app_name" "$SONARQUBE_DATA_TO_PERSIST"
+    persist_app "$SONARQUBE_DATA_TO_PERSIST"
   else
     info "Restoring persisted SonarQube installation"
-    restore_persisted_app "$app_name" "$SONARQUBE_DATA_TO_PERSIST"
+    restore_persisted_app "$SONARQUBE_DATA_TO_PERSIST"
   fi
 
   # Check and move provisioned content from mounted provisioning directory to application directory
@@ -523,7 +526,7 @@ is_app_initialized() {
 #########################
 persist_app() {
   local -a files_to_restore
-  read -r -a files_to_persist <<< "$(tr ',;:' ' ' <<< "$2")"
+  read -r -a files_to_persist <<< "$(tr ',;:' ' ' <<< "$1")"
   local -r install_dir="${SONARQUBE_HOME}"
   local -r persist_dir="${SONARQUBE_VOLUME_DIR}"
   # Persist the individual files
@@ -577,7 +580,7 @@ persist_app() {
 #########################
 restore_persisted_app() {
   local -a files_to_restore
-  read -r -a files_to_restore <<< "$(tr ',;:' ' ' <<< "$2")"
+  read -r -a files_to_restore <<< "$(tr ',;:' ' ' <<< "$1")"
   local -r install_dir="${SONARQUBE_HOME}"
   local -r persist_dir="${SONARQUBE_VOLUME_DIR}"
   # Restore the individual persisted files

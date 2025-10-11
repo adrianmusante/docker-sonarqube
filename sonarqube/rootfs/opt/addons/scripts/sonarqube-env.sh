@@ -33,15 +33,19 @@ sonarqube_env_vars=(
   SONARQUBE_START_TIMEOUT
   SONARQUBE_SKIP_BOOTSTRAP
   SONARQUBE_WEB_CONTEXT
+  SONARQUBE_WEB_URL
   SONARQUBE_MAX_HEAP_SIZE
   SONARQUBE_MIN_HEAP_SIZE
   SONARQUBE_CE_JAVA_ADD_OPTS
   SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS
   SONARQUBE_WEB_JAVA_ADD_OPTS
   SONARQUBE_EXTRA_PROPERTIES
+  SONARQUBE_EXTRA_SETTINGS
   SONARQUBE_USERNAME
   SONARQUBE_PASSWORD
   SONARQUBE_EMAIL
+  SONARQUBE_EMAIL_FROM_ADDRESS
+  SONARQUBE_EMAIL_FROM_NAME
   SONARQUBE_SMTP_HOST
   SONARQUBE_SMTP_PORT_NUMBER
   SONARQUBE_SMTP_USER
@@ -67,15 +71,8 @@ sonarqube_env_vars=(
   POSTGRESQL_DATABASE_PASSWORD
 )
 for env_var in "${sonarqube_env_vars[@]}"; do
-  file_env_var="${env_var}_FILE"
-  if [[ -n "${!file_env_var:-}" ]]; then
-    if [[ -r "${!file_env_var:-}" ]]; then
-      export "${env_var}=$(< "${!file_env_var}")"
-      unset "${file_env_var}"
-    else
-      warn "Skipping export of '${env_var}'. '${!file_env_var:-}' is not readable."
-    fi
-  fi
+  export "${env_var}=$(get_secret "$env_var")" # Use _FILE if available
+  unset "${env_var}_FILE"
 done
 unset sonarqube_env_vars
 

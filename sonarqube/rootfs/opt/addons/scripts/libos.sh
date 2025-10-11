@@ -337,7 +337,7 @@ convert_to_mb() {
 #   None
 #########################
 debug_execute() {
-  if is_boolean_yes "${SONARQUBE_DEBUG:-false}"; then
+  if is_debug_enabled; then
     "$@"
   else
     "$@" >/dev/null 2>&1
