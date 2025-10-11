@@ -84,30 +84,56 @@ debug() {
 do_success() { info "$@"; exit 0; }
 do_error() { error "$@"; exit 1; }
 
-# Gets secret by strategy:
-# ENVIRONMENT_VARIABLE
-# KEY as filename at /var/run/secrets.
-# KEY with suffix _FILE to retrieve path in format absolute or relative to /var/run/secrets
+########################
+# Resolve environment variable value from file/secret or environment variable
+# Strategy:
+# - KEY with suffix _FILE to retrieve path in format absolute or relative to /var/run/secrets
+# - KEY as filename at /var/run/secrets.
+# - ENVIRONMENT_VARIABLE
+# Arguments:
+#   $1 - Environment variable name
+# Returns:
+#   Value of the environment variable or secret
+#########################
 get_secret() {
+  local -r secrets_dir="${SONARQUBE_SECRETS_DIR:-/var/run/secrets}"
   local -r key="${1:-}"
-  _v() { eval "echo \${$1:-}" ;}
+  local value=""
+
   _cat() { cat "$1" 2>/dev/null || true ;}
-  local value
-  value="$(_v "$key")"
-  if [ -z "$value" ]; then
-    value="$(_cat "/var/run/secrets/$key")"
-    if [ -z "$value" ]; then
-      local path="$(_v "${key}_FILE")"
-      if grep -vq '/' <(echo "$path"); then
-        path="/var/run/secrets/$path"
-      fi
-      value="$(_cat "$path")"
+
+  # 1. KEY_FILE
+  local file_var="${key}_FILE"
+  if [ -n "${!file_var:-}" ]; then
+    local file_path
+    file_path="${!file_var}"
+    # If path is relative, prepend $secrets_dir/
+    [[ "$file_path" != /* ]] && file_path="$secrets_dir/$file_path"
+    if [ -r "$file_path" ]; then
+      value="$(_cat "$file_path")"
     fi
   fi
+
+  # 2. $secrets_dir/KEY
+  if [ -z "$value" ] && [ -r "$secrets_dir/$key" ]; then
+    value="$(_cat "$secrets_dir/$key")"
+  fi
+
+  # 3. KEY
+  if [ -z "$value" ] && [ -n "${!key:-}" ]; then
+    value="${!key}"
+  fi
+
   echo "$value"
 }
 
-# Removes secret from this session
+########################
+# Unset environment variable and its _FILE counterpart
+# Arguments:
+#   $1 - Environment variable name
+# Returns:
+#   None
+#########################
 rm_secret() {
   eval "export $1=\"\" ${1}_FILE=\"\"; unset $1 ${1}_FILE"
 }
