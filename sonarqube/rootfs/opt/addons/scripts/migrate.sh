@@ -10,7 +10,7 @@ sonarqube_migrate_db() {
   local -r max_attempt=500
   info "Checking if SonarQube needs to migrate the database"
   for attempt in $(seq 1 $max_attempt); do
-    local state="$(curl -X POST -sSL "$migrate_url" 2>/dev/null | json_pp | grep '"state"' | cut -d '"' -f4 | tr -d '\\n')"
+    local state="$(curl -X POST -sSL "$migrate_url" 2>/dev/null | json_pp 2>/dev/null | grep '"state"' | cut -d '"' -f4 | tr -d '\\n')"
     if [ -z "$state" ]; then
       debug "Waiting to check SonarQube migrate process.. (attempt: $attempt/$max_attempt)"
     elif [ "$state" == "MIGRATION_RUNNING" ]; then
