@@ -96,7 +96,7 @@ RUN set -eux; \
         sed -i 's|PIDDIR=".*"|PIDDIR="\${SONARQUBE_PID_DIR:-\$PWD/pids}"|g' "$f"; \
         sed -i "/^#!.*sh\$/a SONAR_JAVA_PATH=\"$(command -v java)\"" "$f"; \
       done  \
-    && rm -rdf ./jres ./bin/win* ./bin/mac* \
+    && rm -rdf ./bin/win* ./bin/mac* \
     && rm -rdf /tmp/*
 
 COPY rootfs .
