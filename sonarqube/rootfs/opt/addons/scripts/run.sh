@@ -14,7 +14,7 @@ set -euo pipefail
 START_CMD=("${SONARQUBE_BIN_DIR}/sonar.sh" "console")
 
 # SonarQube expects files and folders (i.e. temp or data) to be relative to the CWD by default
-cd "$SONARQUBE_BASE_DIR"
+cd "$SONARQUBE_HOME"
 
 info "** Starting SonarQube **"
 if am_i_root; then

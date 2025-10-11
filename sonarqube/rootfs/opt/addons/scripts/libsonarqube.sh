@@ -286,7 +286,7 @@ sonarqube_start_bg() {
 
   info "Starting SonarQube in background"
   (
-    cd "$SONARQUBE_BASE_DIR" || return 1
+    cd "$SONARQUBE_HOME" || return 1
     if am_i_root; then
       debug_execute run_as_user "$SONARQUBE_DAEMON_USER" "${SONARQUBE_BIN_DIR}/sonar.sh" "start"
     else
