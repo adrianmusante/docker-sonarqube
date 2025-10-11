@@ -34,7 +34,7 @@ services:
     env_file:
       - .env
     environment:
-      - SONARQUBE_DEBUG=${BITNAMI_DEBUG:-true}
+      - SONARQUBE_DEBUG=${SONARQUBE_DEBUG:-true}
       - SONARQUBE_DATABASE_HOST=sonarqube-db
       - SONARQUBE_DATABASE_PORT_NUMBER=5432
       - SONARQUBE_DATABASE_NAME=sonardb
