@@ -50,7 +50,7 @@ postgresql_execute_print_output() {
 #   None
 #########################
 postgresql_execute() {
-  if [[ "${SONARQUBE_DEBUG:-false}" = true ]]; then
+  if is_debug_enabled; then
     "postgresql_execute_print_output" "$@"
   elif [[ "${NO_ERRORS:-false}" = true ]]; then
     "postgresql_execute_print_output" "$@" 2>/dev/null
@@ -100,7 +100,7 @@ postgresql_remote_execute_print_output() {
 # Returns:
 #   None
 postgresql_remote_execute() {
-  if [[ "${SONARQUBE_DEBUG:-false}" = true ]]; then
+  if is_debug_enabled ; then
     "postgresql_remote_execute_print_output" "$@"
   elif [[ "${NO_ERRORS:-false}" = true ]]; then
     "postgresql_remote_execute_print_output" "$@" 2>/dev/null
