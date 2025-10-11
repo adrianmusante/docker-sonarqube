@@ -85,7 +85,10 @@ sonarqube_validate() {
 }
 
 sonarqube_load_extensions() {
-  mkdir -p "$SONARQUBE_VOLUME_DATA_DIR" "$SONARQUBE_VOLUME_PLUGINS_DIR"
+  mkdir -p "$SONARQUBE_VOLUME_DATA_DIR" "$SONARQUBE_VOLUME_PLUGINS_DIR" || {
+    error "Could not create SonarQube volume directories"
+    return 1
+  }
   cp -f "$ADDONS_HOME"/plugins/*.jar "$SONARQUBE_VOLUME_PLUGINS_DIR"
 }
 
@@ -100,7 +103,7 @@ sonarqube_load_extensions() {
 #########################
 sonarqube_initialize() {
   # Load SonarQube extra extensions before any other operation because they could be required during initialization
-  sonarqube_load_extensions
+  sonarqube_load_extensions || return 1
 
   local -a postgresql_execute_args
   read -r -a postgresql_execute_args <<< "$(sonarqube_database_connection_args)"
