@@ -1,6 +1,12 @@
 # docker-sonarqube
 
-A distribution of Sonarqube Community Edition with addons.
+SonarQube&trade; is an open source quality management platform that analyzes and measures code's technical quality. It enables developers to detect code issues, vulnerabilities, and bugs in early stages.
+
+The packaged SonarQube Docker image is based on the official SonarQube Community Edition binaries, but it includes some additional features and plugins to enhance its functionality and usability.
+
+[Overview of SonarQube&trade;](https://www.sonarqube.org)
+
+## Add-ons
 
 ### Pre-installed plugins:
 
@@ -23,8 +29,23 @@ To use a specific version, you can pull a versioned tag. You can view the [list 
 
 - [`25`, `25.9`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
 
+Supported architectures are:
+
+| Architecture | Tag          |
+|--------------|--------------|
+| x86-64       | linux/amd64  |
+| ARM64        | linux/arm64  |
+
 
 ## Configuration
+
+### How to use this image
+
+SonarQube&trade; requires access to a PostgreSQL database to store information. You can use any PostgreSQL database server, either running in a separate container or on a remote host. 
+
+The repository includes an example [`docker-compose.yml`](https://github.com/adrianmusante/docker-sonarqube/blob/main/docker-compose.example.yml) file that shows how to run SonarQube with a PostgreSQL database using official [PostgreSQL Docker image](https://hub.docker.com/_/postgres) via [Docker Compose](https://docs.docker.com/compose/).
+
+The SonarQube instance will be accessible at `http://localhost:9000` (or `http://<your-docker-host-ip>:9000` if you are not running Docker locally). The port can be changed by modifying the `ports` section of the `docker-compose.yml` file. Also, you can change port inside the container by setting the `SONARQUBE_PORT_NUMBER` environment variable (default: `9000`).
 
 ### Environment variables
 
@@ -112,12 +133,109 @@ Available environment variables:
 | `SONARQUBE_DAEMON_GROUP_ID`       | SonarQube system group.                              | `1001`                                     |
 | `SONARQUBE_DEFAULT_DATABASE_HOST` | Default database server host.                        | `postgresql`                               |
 
+### Persisting your application
 
+If you remove the container all your data will be lost, and the next time you run the image the database will be reinitialized. To avoid this loss of data, you should mount a volume that will persist even after the container is removed.
+
+For persistence you should mount a directory at the `/sonarqube` path. If the mounted directory is empty, it will be initialized on the first run. Additionally you should mount a volume for persistence of the PostgreSQL data.
+
+The above examples define the Docker volumes named `sonarqube_db` and `sonarqube`. The SonarQube&trade; application state will persist as long as volumes are not removed.
+
+To avoid inadvertent removal of volumes, you can [mount host directories as data volumes](https://docs.docker.com/engine/tutorials/dockervolumes/). Alternatively you can make use of volume plugins to host the volume data.
+
+Following with the example included in this repository using Docker Compose, you can change the [`docker-compose.yml`](https://github.com/adrianmusante/docker-sonarqube/blob/main/docker-compose.example.yml) file to mount host directories instead of using Docker named volumes. Below is an example of how to do this:
+
+```diff
+   sonarqube-db:
+     ...
+     volumes:
+-      - sonarqube_db:/var/lib/postgresql
++      - /path/to/sonarqube/db:/var/lib/postgresql
+   ...
+   sonarqube:
+     ...
+     volumes:
+-      - sonarqube:/sonarqube
++      - /path/to/sonarqube/data:/sonarqube
+   ...
+-volumes:
+-  sonarqube_db:
+-    driver: local
+-  sonarqube:
+-    driver: local
+```
+
+When using host directories for persistence, keep in mind that this container runs as a non-root user. Therefore, any mounted files and directories must have the correct permissions for UID `1001`. It is recommended to create the directory and set the correct permissions or ownership **before** running Docker for the first time, to ensure Docker does not create it with incompatible permissions.
+
+If the permissions are not set properly, you may see an error message like the following in the container logs: `mkdir: cannot create directory ‘/sonarqube/data’: Permission denied`
+
+You can set the ownership to `1001:1001` with the following commands:
+
+```console
+$ mkdir -p /path/to/sonarqube
+$ chown -R 1001:1001 /path/to/sonarqube
+```
+
+Alternatively, you can set the permissions to `777` (read, write, and execute for everyone):
+
+```console
+$ mkdir -p /path/to/sonarqube
+$ chmod -R 777 /path/to/sonarqube
+```
+
+
+
+### Health check
+
+The SonarQube image includes a health check command that verifies if the SonarQube web application is up and running. The health check tries to connect to the SonarQube web application port (default: `9000`) and analyzes the state of the application by querying the `/api/system/status` endpoint. The health check will be successful when the application status is `UP` or any other status provided via the `-s` option of the `health-check` command line tool (see below).
+
+```console
+$ health-check -h
+Utility to check if SonarQube is healthy.
+
+Usage: health-check [options] ...
+Some of the options include:
+    -u <HEALTH_CHECK_URL>       URL used to check the status of SonarQube. (Optional)
+
+    -s <STATUS>                 Repeat this option to add more valid status. Possible status:
+                                  - STARTING: Server initialization is ongoing
+                                  - UP: SonarQube instance is up and running (always added as valid)
+                                  - DOWN: Instance is up but not running (e.g., due to migration failure)
+                                  - RESTARTING: Restart has been requested
+                                  - DB_MIGRATION_NEEDED: Database migration required
+                                  - DB_MIGRATION_RUNNING: Database migration in progress
+
+    -h                          display this help and exit
+
+Example:
+    - health-check
+    - health-check -u http://my-host:9000/api/system/status
+    - health-check -s STARTING -s RESTARTING
+    - health-check -s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING
+```
+
+This command don't run by default. You can run it manually inside the container or you can add it to your orchestration tool (e.g., Docker Compose, Kubernetes, etc.) to monitor the health of the SonarQube instance.
+
+For example, to add the health check to your `docker-compose.yml` file, you can use the following configuration:
+
+```yaml
+services:
+  sonarqube:
+    ...
+    healthcheck:
+      # if SONARQUBE_SKIP_MIGRATION is set to true, it is recommended to use:
+      #   test: health-check -s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING
+      test: health-check # in normal use
+      start_period: 3m
+      start_interval: 10s
+      interval: 1m
+      timeout: 10s
+      retries: 3
+```
+> [!IMPORTANT]
+> The health check will fail if the SonarQube instance is not fully started, including the case when a database migration is required or is in progress. If you set the `SONARQUBE_SKIP_MIGRATION` environment variable to `yes`, it is recommended to use the `-s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING` options to consider these states as healthy.
 
 ## Issues
 
 If you have any problems with or questions about this image, please contact me
 through a [GitHub issue](https://github.com/adrianmusante/docker-sonarqube/issues).
-
-
-
