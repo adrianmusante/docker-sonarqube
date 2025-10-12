@@ -23,7 +23,7 @@ services:
   sonarqube:
     image: ${DOCKER_REGISTRY:-adrianmusante}/sonarqube:0.0.0
     container_name: sonarqube
-    restart: unless-stopped
+    restart: no
     build:
       context: sonarqube
       args:
