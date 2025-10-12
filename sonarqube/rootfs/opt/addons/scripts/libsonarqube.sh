@@ -126,8 +126,10 @@ sonarqube_initialize() {
   ! is_empty_value "$SONARQUBE_CE_JAVA_ADD_OPTS" && sonarqube_conf_set "sonar.ce.javaAdditionalOpts" "$SONARQUBE_CE_JAVA_ADD_OPTS"
   ! is_empty_value "$SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS" && sonarqube_conf_set "sonar.search.javaAdditionalOpts" "$SONARQUBE_ELASTICSEARCH_JAVA_ADD_OPTS"
   ! is_empty_value "$SONARQUBE_WEB_JAVA_ADD_OPTS" && sonarqube_conf_set "sonar.web.javaAdditionalOpts" "$SONARQUBE_WEB_JAVA_ADD_OPTS"
-  # Disable log rotation (to be handled externally)
-  sonarqube_conf_set "sonar.log.rollingPolicy" "none"
+  # Logging configuration
+  sonarqube_conf_set "sonar.log.level" "$SONARQUBE_LOG_LEVEL"
+  sonarqube_conf_set "sonar.log.rollingPolicy" "$SONARQUBE_LOG_ROLLING_POLICY"
+  sonarqube_conf_set "sonar.log.maxFiles" "$SONARQUBE_LOG_MAX_FILES"
   # Disable telemetry
   sonarqube_conf_set "sonar.telemetry.enable" "false"
   # Additional properties
@@ -153,7 +155,7 @@ sonarqube_initialize() {
     am_i_root && configure_permissions_ownership "$SONARQUBE_VOLUME_DIR" -d "775" -f "664" -u "$SONARQUBE_DAEMON_USER" -g "root"
 
     # Start SonarQube to initialize database, in order to be able to update users
-    sonarqube_start_bg
+    sonarqube_start_bg || return 1
 
     if is_boolean_yes "$SONARQUBE_SKIP_BOOTSTRAP"; then
       info "An already initialized SonarQube was provided, configuration will be skipped"
@@ -181,7 +183,7 @@ EOF
     fi
 
     info "Stopping SonarQube"
-    sonarqube_stop
+    sonarqube_stop || return 1
 
     info "Persisting SonarQube installation"
     persist_app "$SONARQUBE_DATA_TO_PERSIST"
@@ -279,6 +281,31 @@ EOF
   done
 }
 
+sonarqube_wait_for_healthy() {
+  local -r retries="$SONARQUBE_START_TIMEOUT"
+  local -r interval_time=1
+  local attempt=0
+  check_healthy() {
+    local ret=1
+    local health_check_result
+    health_check_result="$(health-check 2>/dev/null)"
+    ret=$?
+    if [ $ret -ne 0 ]; then
+      health_check_result="$(echo "${health_check_result:-Server unreachable}" | tr '\n' ' ')"
+      debug "SonarQube is not fully up (attempt $((++attempt))/${retries}). Details($ret): $health_check_result"
+    fi
+    return $ret
+  }
+  if retry_while check_healthy "$retries" "$interval_time"; then
+    debug "SonarQube is up and running"
+    true
+  else
+    error "SonarQube did not start within the expected time (${retries}s). Check ${SONARQUBE_LOG_FILE} for errors"
+    debug_execute cat "$SONARQUBE_LOG_FILE"
+    return 1
+  fi
+}
+
 ########################
 # Start SonarQube in background
 # Arguments:
@@ -298,8 +325,7 @@ sonarqube_start_bg() {
       debug_execute "${SONARQUBE_BIN_DIR}/sonar.sh" "start"
     fi
     info "Waiting for SonarQube to start..."
-    # Use a RegEx to support both SonarQube 8 & 9 formats
-    wait_for_log_entry "SonarQube is (up|operational)" "$SONARQUBE_LOG_FILE" "$SONARQUBE_START_TIMEOUT" "1"
+    sonarqube_wait_for_healthy
   )
 }
 
@@ -528,7 +554,7 @@ is_app_initialized() {
 #########################
 persist_app() {
   local -a files_to_restore
-  read -r -a files_to_persist <<< "$(tr ',;:' ' ' <<< "$1")"
+  read -r -a files_to_persist <<< "$(tr ',;:' ' ' <<< "$*")"
   local -r install_dir="${SONARQUBE_HOME}"
   local -r persist_dir="${SONARQUBE_VOLUME_DIR}"
   # Persist the individual files
@@ -582,7 +608,7 @@ persist_app() {
 #########################
 restore_persisted_app() {
   local -a files_to_restore
-  read -r -a files_to_restore <<< "$(tr ',;:' ' ' <<< "$1")"
+  read -r -a files_to_restore <<< "$(tr ',;:' ' ' <<< "$*")"
   local -r install_dir="${SONARQUBE_HOME}"
   local -r persist_dir="${SONARQUBE_VOLUME_DIR}"
   # Restore the individual persisted files
@@ -590,15 +616,26 @@ restore_persisted_app() {
     warn "No persisted files are configured to be restored"
     return
   fi
+  local -a new_dirs_to_persist=()
   local file_to_restore_relative file_to_restore_origin file_to_restore_destination
   for file_to_restore in "${files_to_restore[@]}"; do
     file_to_restore_relative="$(relativize "$file_to_restore" "$install_dir")"
     # We use 'realpath --no-symlinks' to ensure that the case of '.' is covered and the directory is removed
     file_to_restore_origin="$(realpath --no-symlinks "${install_dir}/${file_to_restore_relative}")"
     file_to_restore_destination="$(realpath --no-symlinks "${persist_dir}/${file_to_restore_relative}")"
-    rm -rf "$file_to_restore_origin"
-    ln -sfn "$file_to_restore_destination" "$file_to_restore_origin"
+
+    if [[ -d "$file_to_restore_origin" && ! -e "$file_to_restore_destination" ]]; then
+      new_dirs_to_persist+=("$file_to_restore_origin")
+    else
+      debug "Restoring from '${file_to_restore_destination}' to '${file_to_restore_origin}'"
+      rm -rf "$file_to_restore_origin"
+      ln -sfn "$file_to_restore_destination" "$file_to_restore_origin"
+    fi
   done
+  if [[ "${#new_dirs_to_persist[@]}" -gt 0 ]]; then
+    debug "Persisting new SonarQube directories: ${new_dirs_to_persist[*]}"
+    persist_app "${new_dirs_to_persist[@]}"
+  fi
 }
 
 ########################
