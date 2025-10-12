@@ -18,16 +18,16 @@ build:
 		&& docker buildx build --platform linux/amd64 -t "$$DOCKER_REGISTRY/sonarqube:0.0.0" sonarqube --push
 
 run:
-	docker compose down || true; docker compose up --build -V --force-recreate
+	touch .env; docker compose down || true; docker compose up --build -V --force-recreate
 
 run-detach:
-	docker compose down || true; docker compose up --build -V --force-recreate -d
+	touch .env; docker compose down || true; docker compose up --build -V --force-recreate -d
 
 run-db:
 	docker compose up -d -V --force-recreate --no-deps sonarqube_db
 
 run-sonar:
-	docker compose up -d --build -V --force-recreate --no-deps sonarqube && docker compose logs -f sonarqube
+	touch .env; docker compose up -d --build -V --force-recreate --no-deps sonarqube && docker compose logs -f sonarqube
 
 logs-db:
 	docker compose logs -f sonarqube_db
