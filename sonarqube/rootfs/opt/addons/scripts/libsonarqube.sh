@@ -128,6 +128,8 @@ sonarqube_initialize() {
   ! is_empty_value "$SONARQUBE_WEB_JAVA_ADD_OPTS" && sonarqube_conf_set "sonar.web.javaAdditionalOpts" "$SONARQUBE_WEB_JAVA_ADD_OPTS"
   # Disable log rotation (to be handled externally)
   sonarqube_conf_set "sonar.log.rollingPolicy" "none"
+  # Disable telemetry
+  sonarqube_conf_set "sonar.telemetry.enable" "false"
   # Additional properties
   local -a additional_properties
   IFS=',' read -r -a additional_properties <<< "$SONARQUBE_EXTRA_PROPERTIES"

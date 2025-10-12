@@ -108,13 +108,6 @@ export SONARQUBE_EXTRA_SETTINGS="${SONARQUBE_EXTRA_SETTINGS:-}"
 
 SONARQUBE_EXTRA_PROPERTIES="${SONARQUBE_EXTRA_PROPERTIES:-"${SONARQUBE_PROPERTIES:-}"}"
 export SONARQUBE_EXTRA_PROPERTIES="${SONARQUBE_EXTRA_PROPERTIES:-}"
-sonarqube_override_extra_properties() {
-  local extra_props="sonar.telemetry.enable=false"
-  local -r props="${SONARQUBE_EXTRA_PROPERTIES:-}"
-  [ -z "$props" ] || extra_props="$extra_props,$props"
-  export SONARQUBE_EXTRA_PROPERTIES="$extra_props"
-}
-sonarqube_override_extra_properties
 
 export SONARQUBE_API_URL="http://127.0.0.1:${SONARQUBE_PORT_NUMBER}$(ensure_url $SONARQUBE_WEB_CONTEXT)/api" # only for internal processes
 export SONARQUBE_WEB_URL="$(ensure_url "${SONARQUBE_WEB_URL:-}")"
