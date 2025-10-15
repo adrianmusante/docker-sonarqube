@@ -33,6 +33,7 @@ RUN set -eux; export DEBIAN_FRONTEND=noninteractive && apt-get update -yq \
     && locale-gen en_US.UTF-8 \
     && groupadd --system -g $gid $group \
     && useradd --system -u $uid -g $gid -m -s /bin/bash $user \
+    && usermod -aG root $user \
     && case ${TARGETPLATFORM} in \
              linux/amd64) JAVA_PLATFORM=x64  ;; \
              linux/arm64) JAVA_PLATFORM=aarch64  ;; \
@@ -87,11 +88,11 @@ RUN set -eux; \
     && unzip -DD -q /tmp/sonarqube-webapp.zip -d /tmp/sonarqube-webapp \
     && rsync -a --checksum --delete /tmp/sonarqube-webapp/ "./$SONARQUBE_HOME/web/" \
     && cd "./$SONARQUBE_HOME" \
-    && chown $uid:$gid . \
     && for dir in conf data elasticsearch/config extensions logs pids temp ; do \
         mkdir -p "$dir"; \
-        chown -R $uid:$gid "$dir"; \
+        find "$dir" -type f -not -perm /111 -exec chmod 664 {} + ; \
       done \
+    && find . -type d -exec chmod 775 {} + \
     && find ./bin/linux-*/ -type f -name sonar.sh | while read -r f; do \
         sed -i 's|PIDDIR=".*"|PIDDIR="\${SONARQUBE_PID_DIR:-\$PWD/pids}"|g' "$f"; \
         sed -i "/^#!.*sh\$/a SONAR_JAVA_PATH=\"$(command -v java)\"" "$f"; \
