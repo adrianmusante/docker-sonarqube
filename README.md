@@ -14,7 +14,6 @@ The packaged SonarQube Docker image is based on the official SonarQube Community
 
 ### Additional features:
 
-- SonarQube telemetry disabled
 - Unattended [migration](https://docs.sonarqube.org/latest/setup/upgrading)
 - Health-Check command-line tool
 - Gravatar enabled by default
@@ -31,10 +30,8 @@ To use a specific version, you can pull a versioned tag. You can view the [list 
 
 Supported architectures are:
 
-| Architecture | Tag          |
-|--------------|--------------|
-| x86-64       | linux/amd64  |
-| ARM64        | linux/arm64  |
+- x86-64: `linux/amd64`
+- ARM64: `linux/arm64`
 
 
 ## Configuration
@@ -45,31 +42,13 @@ SonarQube&trade; requires access to a PostgreSQL database to store information. 
 
 The repository includes an example [`docker-compose.yml`](https://github.com/adrianmusante/docker-sonarqube/blob/main/docker-compose.example.yml) file that shows how to run SonarQube with a PostgreSQL database using official [PostgreSQL Docker image](https://hub.docker.com/_/postgres) via [Docker Compose](https://docs.docker.com/compose/).
 
-The SonarQube instance will be accessible at `http://localhost:9000` (or `http://<your-docker-host-ip>:9000` if you are not running Docker locally). The port can be changed by modifying the `ports` section of the `docker-compose.yml` file. Also, you can change port inside the container by setting the `SONARQUBE_PORT_NUMBER` environment variable (default: `9000`).
+The SonarQube instance will be accessible at `http://localhost:9000` (or `http://<your-docker-host-ip>:9000` if you are not running Docker locally). The port can be changed by modifying the `ports` section of the `docker-compose.yml` file. Also, you can change port inside the container by setting the `SONARQUBE_PORT_NUMBER` environment variable.
 
 ### Environment variables
 
-When you start the SonarQube image, you can adjust the configuration of the instance by passing one or more environment variables either on the docker-compose file or on the `docker run` command line. If you want to add a new environment variable:
+When you start the SonarQube image, you can adjust the configuration of the instance by passing one or more environment variables either on the docker-compose file or on the `docker run` command line. 
 
-- For docker-compose add the variable name and value under the application section in the [`docker-compose.yml`](https://github.com/adrianmusante/docker-sonarqube/blob/main/docker-compose.example.yml) file present in this repository:
-
-    ```yaml
-    sonarqube:
-      # ...
-      environment:
-        - USER_DEFINED_KEY=custom_value
-      # ...
-    ```
-
-- For manual execution add a `--env` option with each variable and value:
-
-    ```console
-    $ docker run -d --name sonarqube -p 80:9000 \
-      --env USER_DEFINED_KEY=custom_value \
-      --network sonarqube_network \
-      --volume /path/to/sonarqube-persistence:/sonarqube \
-      adrianmusante/sonarqube:latest
-    ```
+The following sections describe the available environment variables for configuring the SonarQube instance.
 
 #### Customizable environment variables
 
@@ -189,7 +168,7 @@ $ chmod -R 777 /path/to/sonarqube
 
 ### Health check
 
-The SonarQube image includes a health check command that verifies if the SonarQube web application is up and running. The health check tries to connect to the SonarQube web application port (default: `9000`) and analyzes the state of the application by querying the `/api/system/status` endpoint. The health check will be successful when the application status is `UP` or any other status provided via the `-s` option of the `health-check` command line tool (see below).
+The SonarQube image includes a health check command that verifies if the SonarQube web application is up and running. The health check tries to connect to the SonarQube and analyzes the state of the application by querying the `/api/system/status` endpoint. The health check will be successful when the application status is `UP` or any other status provided via the `-s` option of the `health-check` command line tool (see below).
 
 ```console
 $ health-check -h
@@ -225,9 +204,7 @@ services:
   sonarqube:
     # ...
     healthcheck:
-      # if SONARQUBE_SKIP_MIGRATION is set to true, it is recommended to use:
-      #   test: health-check -s DB_MIGRATION_NEEDED -s DB_MIGRATION_RUNNING
-      test: health-check # in normal use
+      test: health-check
       start_period: 3m
       start_interval: 10s
       interval: 1m
