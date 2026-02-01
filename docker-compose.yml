@@ -1,7 +1,7 @@
 # This docker-compose is only for local
 services:
   sonarqube-db:
-    image: postgres:18-alpine
+    image: postgres:17-alpine
     container_name: sonarqube-db
     restart: unless-stopped
     environment:
@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=sonar
       - POSTGRES_DB=sonardb
     volumes:
-      - ./_local/data/sonarqube_db:/var/lib/postgresql
+      - ./_local/data/sonarqube_db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:

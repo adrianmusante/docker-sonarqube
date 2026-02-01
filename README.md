@@ -131,8 +131,8 @@ Following with the example included in this repository using Docker Compose, you
    sonarqube-db:
      ...
      volumes:
--      - sonarqube_db:/var/lib/postgresql
-+      - /path/to/sonarqube/db:/var/lib/postgresql
+-      - sonarqube_db:/var/lib/postgresql/data
++      - /path/to/sonarqube/db:/var/lib/postgresql/data
    ...
    sonarqube:
      ...
