@@ -26,7 +26,7 @@ The recommended way to get the SonarQube Docker Image is to pull the prebuilt im
 
 To use a specific version, you can pull a versioned tag. You can view the [list of available versions](https://hub.docker.com/r/adrianmusante/sonarqube/tags/) in the Docker Hub Registry. 
 
-- [`25`, `25.12`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
+- [`26`, `26.1`, `latest` (sonarqube/Dockerfile)](https://github.com/adrianmusante/docker-sonarqube/blob/main/sonarqube/Dockerfile)
 
 Supported architectures are:
 
@@ -131,8 +131,8 @@ Following with the example included in this repository using Docker Compose, you
    sonarqube-db:
      ...
      volumes:
--      - sonarqube_db:/var/lib/postgresql
-+      - /path/to/sonarqube/db:/var/lib/postgresql
+-      - sonarqube_db:/var/lib/postgresql/data
++      - /path/to/sonarqube/db:/var/lib/postgresql/data
    ...
    sonarqube:
      ...

@@ -1,7 +1,7 @@
-ARG SONARQUBE_VERSION=25.12.0.117093
-ARG SONARQUBE_PR_PLUGIN_VERSION=25.12.0
+ARG SONARQUBE_VERSION=26.1.0.118079
+ARG SONARQUBE_PR_PLUGIN_VERSION=26.1.0
 ARG DEBIAN_VERSION=trixie-slim
-ARG JAVA_VERSION=17
+ARG JAVA_VERSION=21
 
 ARG BUILD_DIR=/build
 ARG BUILD_TAG
@@ -21,7 +21,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' \
     SONARQUBE_DAEMON_GROUP_ID=$gid SONARQUBE_DAEMON_GROUP=$group
 
 ARG JAVA_VERSION
-ENV JAVA_HOME=/opt/java/jre$JAVA_VERSION
+ENV JAVA_HOME=/opt/java/jdk$JAVA_VERSION
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 RUN set -eux; export DEBIAN_FRONTEND=noninteractive && apt-get update -yq \
@@ -40,7 +40,7 @@ RUN set -eux; export DEBIAN_FRONTEND=noninteractive && apt-get update -yq \
              *) echo "Unsupported platform: ${TARGETPLATFORM}" ; exit 1 ;; \
         esac \
     && mkdir -p "$JAVA_HOME" \
-    && curl -fsSL "https://api.adoptium.net/v3/binary/latest/$JAVA_VERSION/ga/linux/$JAVA_PLATFORM/jre/hotspot/normal/eclipse" | tar -xz -C "$JAVA_HOME" --strip-components=1 \
+    && curl -fsSL "https://api.adoptium.net/v3/binary/latest/$JAVA_VERSION/ga/linux/$JAVA_PLATFORM/jdk/hotspot/normal/eclipse" | tar -xz -C "$JAVA_HOME" --strip-components=1 \
     && java -version 1>&2 \
     && apt-get autoclean -y && apt-get autoremove -yq && apt-get clean -y \
     && rm -rdf /var/lib/apt/list/* \
