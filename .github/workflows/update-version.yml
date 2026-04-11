@@ -51,8 +51,8 @@ jobs:
           if [ -z "$version" ]; then
             version="$(get_sonarqube_version "$(echo "$pr_plugin_version" | cut -d'.' -f1,2)")"
             if [ -z "$version" ]; then
-              echo "::warning::Failed to fetch SonarQube version for pr plugin version $pr_plugin_version" >&2
-              exit 1
+              version="${{ steps.get-current.outputs.version }}"
+              echo "::warning::Failed to fetch SonarQube version for pr plugin version $pr_plugin_version. Using existing version: $version"
             else
               echo "::warning::Using minor version match for SonarQube version: $version"
             fi
