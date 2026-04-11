@@ -34,7 +34,7 @@ jobs:
           version="$(get_version "$DOCKERFILE_VERSION_KEY")"
           os_version="$(get_version "$DOCKERFILE_OS_VERSION_KEY")"
           
-          echo "Current version: $version (pr plugin: $pr_plugin_version, os: $os_version)"
+          echo "Current version: $version (pr plugin: $pr_plugin_version, os: $os_version)" >> $GITHUB_STEP_SUMMARY
           echo "pr_plugin_version=$pr_plugin_version" >> $GITHUB_OUTPUT
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "os_version=$os_version" >> $GITHUB_OUTPUT
@@ -66,7 +66,7 @@ jobs:
             echo "::warning::Failed to fetch latest Debian version, using existing version: $os_version"
           fi
           
-          echo "Latest version: $version (pr plugin: $pr_plugin_version, os: $os_version)"
+          echo "Latest version: $version (pr plugin: $pr_plugin_version, os: $os_version)" >> $GITHUB_STEP_SUMMARY
           echo "pr_plugin_version=$pr_plugin_version" >> $GITHUB_OUTPUT
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "os_version=$os_version" >> $GITHUB_OUTPUT
