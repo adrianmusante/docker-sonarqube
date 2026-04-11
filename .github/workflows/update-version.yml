@@ -49,7 +49,7 @@ jobs:
           get_sonarqube_version() { curl -sSfL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/SonarSource/sonarqube/releases?per_page=100" | json_pp  | grep '"tag_name"' | cut -d '"' -f4  | grep "^$(echo "$1." | sed 's/\./\\./g')" | head -n 1 || echo ""; }
           version="$(get_sonarqube_version "$pr_plugin_version")"
           if [ -z "$version" ]; then
-            version="$(get_sonarqube_version "$(echo "$pr_plugin_version" | cut -d'.' -f1,1)")"
+            version="$(get_sonarqube_version "$(echo "$pr_plugin_version" | cut -d'.' -f1,2)")"
             if [ -z "$version" ]; then
               echo "::warning::Failed to fetch SonarQube version for pr plugin version $pr_plugin_version" >&2
               exit 1
