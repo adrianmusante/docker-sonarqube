@@ -20,7 +20,7 @@ jobs:
   update-version:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ env.GH_TOKEN }}
+      GH_TOKEN: ${{ secrets.BOT_GH_TOKEN != '' && secrets.BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
