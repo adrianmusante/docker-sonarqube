@@ -19,9 +19,13 @@ env:
 jobs:
   update-version:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.BOT_GH_TOKEN != '' && secrets.BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
+        with:
+          token: ${{ env.GH_TOKEN }}
       - name: Configure Git user
         run: |
           git config user.name github-actions[bot]
@@ -42,11 +46,11 @@ jobs:
         id: get-latest
         run: |
           # Retrieve latest pr plugin version
-          pr_plugin_version="$(curl -sSfL -H 'Authorization: Bearer ${{ secrets.BOT_GH_TOKEN != '' && secrets.BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}' https://api.github.com/repos/mc1arke/sonarqube-community-branch-plugin/releases/latest | json_pp | grep '"tag_name"' | cut -d '"' -f4 | tr -d '\\n' | tr -d 'v')"
+          pr_plugin_version="$(curl -sSfL -H 'Authorization: Bearer ${{ env.GH_TOKEN }}' https://api.github.com/repos/mc1arke/sonarqube-community-branch-plugin/releases/latest | json_pp | grep '"tag_name"' | cut -d '"' -f4 | tr -d '\\n' | tr -d 'v')"
           if [ -z "$pr_plugin_version" ]; then echo "Failed to fetch latest version" >&2; exit 1 ; fi
           
           # Retrieve SonarQube compilation version by pr plugin version
-          get_sonarqube_version() { curl -sSfL -H 'Authorization: Bearer ${{ secrets.BOT_GH_TOKEN != '' && secrets.BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}' "https://api.github.com/repos/SonarSource/sonarqube/releases?per_page=100" | json_pp  | grep '"tag_name"' | cut -d '"' -f4  | grep "^$(echo "$1." | sed 's/\./\\./g')" | head -n 1 | grep -oE '[0-9]+(\.[0-9]+)+' || echo ""; }
+          get_sonarqube_version() { curl -sSfL -H 'Authorization: Bearer ${{ env.GH_TOKEN }}' "https://api.github.com/repos/SonarSource/sonarqube/releases?per_page=100" | json_pp  | grep '"tag_name"' | cut -d '"' -f4  | grep "^$(echo "$1." | sed 's/\./\\./g')" | head -n 1 | grep -oE '[0-9]+(\.[0-9]+)+' || echo ""; }
           version="$(get_sonarqube_version "$pr_plugin_version")"
           if [ -z "$version" ]; then
             version="$(get_sonarqube_version "$(echo "$pr_plugin_version" | cut -d'.' -f1,2)")"
@@ -83,8 +87,6 @@ jobs:
       - name: Pull request metadata
         if: steps.check.outputs.up_to_date == 'false'
         id: pr
-        env:
-          GH_TOKEN: ${{ secrets.BOT_GH_TOKEN != '' && secrets.BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           version="${{ steps.get-latest.outputs.version }}"
           title="Update $DEPENDENCY_NAME to v$version (pr plugin: ${{ steps.get-latest.outputs.pr_plugin_version }}, os: ${{ steps.get-latest.outputs.os_version }})"
@@ -100,8 +102,6 @@ jobs:
           echo "base_branch=main" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         if: steps.pr.outputs.exists == 'false' && steps.check.outputs.up_to_date == 'false'
-        env:
-          GH_TOKEN: ${{ secrets.BOT_GH_TOKEN != '' && secrets.BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           version="${{ steps.get-latest.outputs.version }}"
           branch="${{ steps.pr.outputs.head_branch }}"
